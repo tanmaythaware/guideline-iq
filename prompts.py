@@ -13,7 +13,10 @@ def build_user_prompt(query: str, sources_text: str) -> str:
 SOURCE:
 {sources_text}
 
-INSTRUCTIONS:
-- Answer the QUERY using only SOURCE.
-- If SOURCE is insufficient, say you don't know based on the sources.
+INSTRUCTIONS (follow all):
+- Answer using only the SOURCE text.
+- If SOURCE is insufficient, respond exactly: "{REFUSAL_TEXT}" (no bullets).
+- Otherwise, respond as bullet points.
+- Each bullet must end with the source id in square brackets, using the id string from SOURCE (e.g., [nice_cg95_acs]).
+- Do not add any text after the bracketed source id.
 """

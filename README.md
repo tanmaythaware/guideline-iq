@@ -79,7 +79,6 @@ Create a .env file in the repo root:
 OPENAI_API_KEY=your_key_here
 ```
 
-Important: Do not commit .env. Ensure it is listed in .gitignore.
 
 ---
 
@@ -101,7 +100,7 @@ streamlit run app_streamlit.py
 
 ---
 
-## Sample queries (for demo)
+## Sample queries 
 
 - In-scope answer: “What should a cryptoasset risk warning and promotion avoid or include for retail customers?”
 - Out-of-scope refusal: “What is the exact FCA threshold for classifying a customer as high net worth?”
