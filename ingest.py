@@ -1,16 +1,8 @@
-# Source of Truth: (Later) NICE CG95 Guideline on Chest Pain of Recent Onset
+import json
 
-docs = [
-    {
-        "id": "nice_cg95_acs",
-        "text": "Chest pain with suspected acute coronary syndrome requires urgent clinical assessment and may need emergency services."
-    },
-    {
-        "id": "nice_cg95_risk",
-        "text": "Assess red flags, symptoms, and history to determine urgency and likely cause of chest pain."
-    },
-    {
-        "id": "nice_cg95_grounding",
-        "text": "Use authoritative guidance and avoid speculation; base responses on the provided guideline text."
-    },
-]
+docs = []
+with open("data/finance_guidelines.jsonl", "r") as f:
+    for line in f:
+        line = line.strip()
+        if line:
+            docs.append(json.loads(line))

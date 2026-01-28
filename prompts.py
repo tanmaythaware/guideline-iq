@@ -1,6 +1,8 @@
-SYSTEM_PROMPT = """You are a careful assistant.
+REFUSAL_TEXT = "I don't know based on the provided sources yet."
+
+SYSTEM_PROMPT = f"""You are a careful assistant.
 Use ONLY the provided SOURCE text to answer.
-If the SOURCE does not contain the answer, say: "I don't know based on the provided sources."
+If the SOURCE does not contain the answer, say: "{REFUSAL_TEXT}"
 Keep answers concise and actionable.
 Do not invent facts."""
 
