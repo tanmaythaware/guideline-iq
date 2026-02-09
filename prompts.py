@@ -1,4 +1,5 @@
 REFUSAL_TEXT = "I don't know based on the provided sources yet."
+SAFE_FAILURE_TEXT = "I can't answer safely right now."
 
 SYSTEM_PROMPT = f"""You are a careful assistant.
 Use ONLY the provided SOURCE text to answer.

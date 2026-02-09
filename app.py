@@ -5,12 +5,12 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 
 from ingest import docs
-from rag_core import InMemoryVectorStore, generate_answer, classify_query_domain
+from rag_core import InMemoryVectorStore, generate_answer, classify_query_domain, SafeFailureError
 import json
 import time
 import uuid
 from pathlib import Path
-from prompts import REFUSAL_TEXT
+from prompts import REFUSAL_TEXT, SAFE_FAILURE_TEXT
 
 
 load_dotenv()
@@ -97,6 +97,61 @@ def score_to_confidence(score: float) -> str:
     return "low"
 
 
+def _safe_failure_response(
+    request_id: str,
+    query: str,
+    failure_reason: str,
+    *,
+    classifier: dict | None = None,
+    sources: list[dict] | None = None,
+) -> dict:
+    """
+    Return a safe refusal response when OpenAI API calls fail after retries.
+    """
+    sources = sources or []
+    top_score = float(sources[0]["score"]) if sources else 0.0
+    
+    log_refusal(
+        request_id,
+        query,
+        sources,
+        failure_reason,
+        classifier=classifier,
+        top_score=top_score if sources else None,
+    )
+    
+    response = {
+        "request_id": request_id,
+        "query": query,
+        "answer": SAFE_FAILURE_TEXT,
+        "decision": "refuse",
+        "confidence": "low",
+        "citations": [],
+        "classifier": classifier,
+        "policy": {
+            "domain_conf_threshold": DOMAIN_CONF_THRESHOLD,
+            "retrieval_score_threshold": RETRIEVAL_SCORE_THRESHOLD,
+        },
+        "refusal_reason": failure_reason,
+        "retrieval": {
+            "top_k": len(sources),
+            "results": [
+                {"id": s["id"], "score": float(s.get("score", 0.0))}
+                for s in sources
+            ],
+            "duration_ms": 0.0,
+        },
+    }
+    
+    logger.info(
+        "request_id=%s event=request_end decision=refuse reason=%s",
+        request_id,
+        failure_reason,
+    )
+    log_response(response)
+    return response
+
+
 @app.get("/ask")
 def ask(q: str):
     request_id = str(uuid.uuid4())
@@ -111,7 +166,11 @@ def ask(q: str):
 
     # 1) Domain classification guardrail: is this even a finance/compliance question?
     cls_start = time.perf_counter()
-    classifier = classify_query_domain(q)
+    try:
+        classifier = classify_query_domain(q)
+    except SafeFailureError as exc:
+        logger.error("request_id=%s classification failed after retries: %s", request_id, exc)
+        return _safe_failure_response(request_id, q, "classification_failure")
     cls_ms = (time.perf_counter() - cls_start) * 1000
     classifier_label = classifier.get("label", "unsure")
     classifier_conf = float(classifier.get("confidence", 0.0))
@@ -179,7 +238,11 @@ def ask(q: str):
 
     # 2) Retrieval guardrail: only proceed to generation if we have a strong match.
     retrieval_start = time.perf_counter()
-    sources = store.query(q, top_k=2)
+    try:
+        sources = store.query(q, top_k=2)
+    except SafeFailureError as exc:
+        logger.error("request_id=%s retrieval failed after retries: %s", request_id, exc)
+        return _safe_failure_response(request_id, q, "retrieval_failure", classifier=classifier)
     retrieval_ms = (time.perf_counter() - retrieval_start) * 1000
     logger.info(
         "request_id=%s event=retrieval_end ms=%.1f results=%d",
@@ -223,7 +286,13 @@ def ask(q: str):
         else:
             # 3) Generation: we have an in-domain query AND strong retrieval.
             gen_start = time.perf_counter()
-            answer = generate_answer(q, sources)
+            try:
+                answer = generate_answer(q, sources)
+            except SafeFailureError as exc:
+                logger.error("request_id=%s generation failed after retries: %s", request_id, exc)
+                return _safe_failure_response(
+                    request_id, q, "generation_failure", classifier=classifier, sources=sources
+                )
             gen_ms = (time.perf_counter() - gen_start) * 1000
             logger.info("request_id=%s event=generation_end ms=%.1f", request_id, gen_ms)
 

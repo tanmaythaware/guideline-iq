@@ -1,10 +1,11 @@
 import os
 import json
 import logging
-from typing import List, Dict
+import time
+from typing import List, Dict, Callable, TypeVar
 
 import numpy as np
-from openai import OpenAI
+from openai import OpenAI, APITimeoutError, APIError, APIConnectionError
 
 from dotenv import load_dotenv
 
@@ -20,14 +21,75 @@ CLASSIFIER_MODEL_NAME = "gpt-4o-mini"
 
 
 # OpenAI client initialized once.
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"), timeout=30.0)
+
+# Retry configuration
+MAX_RETRIES = 3
+RETRY_BASE_DELAY = 1.0  # seconds
+
+T = TypeVar('T')
+
+
+class SafeFailureError(Exception):
+    """Raised when all retries are exhausted for OpenAI API calls."""
+    pass
+
+
+def with_retry(
+    func: Callable[[], T],
+    operation_name: str,
+    max_retries: int = MAX_RETRIES,
+) -> T:
+    """
+    Wrapper for OpenAI API calls with timeout, retry, and safe failure.
+    
+    Retries on transient errors (timeout, connection, rate limit).
+    After max_retries, raises SafeFailureError.
+    """
+    last_exception = None
+    
+    for attempt in range(max_retries):
+        try:
+            return func()
+        except (APITimeoutError, APIConnectionError, APIError) as exc:
+            last_exception = exc
+            if attempt < max_retries - 1:
+                delay = RETRY_BASE_DELAY * (2 ** attempt)  # exponential backoff
+                logger.warning(
+                    "%s failed (attempt %d/%d): %s. Retrying in %.1fs...",
+                    operation_name,
+                    attempt + 1,
+                    max_retries,
+                    str(exc),
+                    delay,
+                )
+                time.sleep(delay)
+            else:
+                logger.error(
+                    "%s failed after %d attempts: %s",
+                    operation_name,
+                    max_retries,
+                    str(exc),
+                )
+        except Exception as exc:
+            # Non-API errors (e.g., JSON parsing) should not be retried
+            logger.error("%s failed with non-retryable error: %s", operation_name, str(exc))
+            raise
+    
+    # All retries exhausted
+    raise SafeFailureError(
+        f"{operation_name} failed after {max_retries} attempts: {str(last_exception)}"
+    )
 
 def embed_texts(texts: List[str]) -> np.ndarray:
     """Embed texts with OpenAI and return a 2D numpy array of vectors."""
     # Keep embeddings batched to reduce API calls.
     logger.info("Embedding %d texts.", len(texts))
     # OpenAI returns embeddings in the same order as inputs.
-    resp = client.embeddings.create(model=EMBEDDING_MODEL_NAME, input=texts)
+    def _call():
+        return client.embeddings.create(model=EMBEDDING_MODEL_NAME, input=texts)
+    
+    resp = with_retry(_call, f"embed_texts({len(texts)} texts)")
     vectors = [item.embedding for item in resp.data]
     return np.array(vectors, dtype=np.float32)
 
@@ -91,15 +153,18 @@ def generate_answer(query: str, sources: list[dict]) -> str:
     sources_text = format_sources_for_prompt(sources)
 
     logger.info("Generating answer with %d sources.", len(sources))
-    resp = client.chat.completions.create(
-        model=GENERATION_MODEL_NAME,
-        messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": build_user_prompt(query, sources_text)},
-        ],
-        temperature=0.2,
-    )
-
+    
+    def _call():
+        return client.chat.completions.create(
+            model=GENERATION_MODEL_NAME,
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": build_user_prompt(query, sources_text)},
+            ],
+            temperature=0.2,
+        )
+    
+    resp = with_retry(_call, "generate_answer")
     return resp.choices[0].message.content.strip()
 
 
@@ -129,20 +194,27 @@ def classify_query_domain(query: str) -> Dict:
 
     try:
         logger.info("Classifying query domain.")
-        resp = client.chat.completions.create(
-            model=CLASSIFIER_MODEL_NAME,
-            messages=[
-                {"role": "system", "content": system_msg},
-                {"role": "user", "content": query},
-            ],
-            temperature=0.0,
-        )
+        
+        def _call():
+            return client.chat.completions.create(
+                model=CLASSIFIER_MODEL_NAME,
+                messages=[
+                    {"role": "system", "content": system_msg},
+                    {"role": "user", "content": query},
+                ],
+                temperature=0.0,
+            )
+        
+        resp = with_retry(_call, "classify_query_domain")
         content = resp.choices[0].message.content.strip()
         parsed = json.loads(content)
         label = parsed.get("label", "unsure")
         confidence = float(parsed.get("confidence", 0.0))
         return {"label": label, "confidence": confidence, "raw": content}
+    except SafeFailureError:
+        # Retries exhausted: propagate to caller for safe refusal handling
+        raise
     except Exception as exc:
-        # On any failure, fall back to an uncertain, non-finance classification.
-        logger.exception("Query domain classification failed: %s", exc)
+        # Non-retryable errors (e.g., JSON parsing): fall back to uncertain classification
+        logger.exception("Query domain classification failed (non-retryable): %s", exc)
         return {"label": "unsure", "confidence": 0.0, "raw": None}
