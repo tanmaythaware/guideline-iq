@@ -1,4 +1,5 @@
 import os
+import json
 import logging
 from typing import List, Dict
 
@@ -13,7 +14,9 @@ load_dotenv()
 # Module logger for RAG core steps (embeddings, retrieval, generation).
 logger = logging.getLogger("guideline_iq.rag")
 
-MODEL_NAME = "text-embedding-3-small"
+EMBEDDING_MODEL_NAME = "text-embedding-3-small"
+GENERATION_MODEL_NAME = "gpt-4o-mini"
+CLASSIFIER_MODEL_NAME = "gpt-4o-mini"
 
 
 # OpenAI client initialized once.
@@ -24,7 +27,7 @@ def embed_texts(texts: List[str]) -> np.ndarray:
     # Keep embeddings batched to reduce API calls.
     logger.info("Embedding %d texts.", len(texts))
     # OpenAI returns embeddings in the same order as inputs.
-    resp = client.embeddings.create(model=MODEL_NAME, input=texts)
+    resp = client.embeddings.create(model=EMBEDDING_MODEL_NAME, input=texts)
     vectors = [item.embedding for item in resp.data]
     return np.array(vectors, dtype=np.float32)
 
@@ -89,7 +92,7 @@ def generate_answer(query: str, sources: list[dict]) -> str:
 
     logger.info("Generating answer with %d sources.", len(sources))
     resp = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=GENERATION_MODEL_NAME,
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": build_user_prompt(query, sources_text)},
@@ -98,3 +101,48 @@ def generate_answer(query: str, sources: list[dict]) -> str:
     )
 
     return resp.choices[0].message.content.strip()
+
+
+def classify_query_domain(query: str) -> Dict:
+    """
+    Classify whether a query is in the finance/compliance domain.
+
+    Returns a dict like:
+    {
+        "label": "finance" | "non_finance" | "unsure",
+        "confidence": float between 0 and 1,
+        "raw": <original model output str>,
+    }
+    """
+    system_msg = (
+        "You are a domain classifier for a finance and compliance assistant.\n"
+        "Decide if the user's question is primarily about finance, financial "
+        "regulation, consumer duty, risk warnings, or financial promotions. "
+        "If the question is about any of these topics, classify it as 'finance'. "
+        "If the question is not about any of these topics, classify it as 'non_finance'. "
+        "If you are unsure, classify it as 'unsure'.\n\n"
+        "Respond ONLY with JSON in this exact format:\n"
+        '{\"label\": \"finance\" | \"non_finance\" | \"unsure\", '
+        '\"confidence\": <number between 0 and 1>}.\n'
+        "Do not add any explanation or extra text."
+    )
+
+    try:
+        logger.info("Classifying query domain.")
+        resp = client.chat.completions.create(
+            model=CLASSIFIER_MODEL_NAME,
+            messages=[
+                {"role": "system", "content": system_msg},
+                {"role": "user", "content": query},
+            ],
+            temperature=0.0,
+        )
+        content = resp.choices[0].message.content.strip()
+        parsed = json.loads(content)
+        label = parsed.get("label", "unsure")
+        confidence = float(parsed.get("confidence", 0.0))
+        return {"label": label, "confidence": confidence, "raw": content}
+    except Exception as exc:
+        # On any failure, fall back to an uncertain, non-finance classification.
+        logger.exception("Query domain classification failed: %s", exc)
+        return {"label": "unsure", "confidence": 0.0, "raw": None}

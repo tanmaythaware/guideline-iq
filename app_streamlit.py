@@ -1,6 +1,6 @@
 import streamlit as st
 import requests
-
+from string import capwords
 st.set_page_config(page_title="Guideline IQ", page_icon="🤖", layout = "centered")
 
 st.title("Guideline IQ 🤖")
@@ -24,9 +24,15 @@ if st.button("Ask") and q.strip():
         st.subheader("Answer:")
         st.write(data.get("answer", ""))
 
-        st.caption(
-            f"Decision: {data.get('decision', 'n/a')} | Confidence: {data.get('confidence', 'n/a')}"
-        )
+        # add badge for decision and confidence
+        if data.get('decision') == 'answer':
+            st.markdown(
+                f"**Decision: :green-badge[Answer] | Confidence: :blue-badge[{capwords(data.get('confidence'))}]**"
+            )
+        else:
+            st.markdown(
+                f"**Decision: :red-badge[Refusal] | Confidence: :blue-badge[{capwords(data.get('confidence'))}]**"
+            )
 
         st.subheader("Sources:")
         citations = data.get("citations", [])
