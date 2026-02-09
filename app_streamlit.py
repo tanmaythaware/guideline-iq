@@ -1,6 +1,13 @@
 import streamlit as st
 import requests
 from string import capwords
+from dotenv import load_dotenv
+import os
+load_dotenv()
+
+# add api url environment variable
+API_BASE_URL = os.getenv("API_BASE_URL")
+
 st.set_page_config(page_title="Guideline IQ", page_icon="🤖", layout = "centered")
 
 st.title("Guideline IQ 🤖")
@@ -14,7 +21,7 @@ q = st.text_input(
 if st.button("Ask") and q.strip():
     try:
         response = requests.get(
-            "http://localhost:8000/ask",
+            f"{API_BASE_URL}/ask",
             params={"q": q},
             timeout=30,
         )
@@ -40,8 +47,10 @@ if st.button("Ask") and q.strip():
             st.write("No sources returned.")
         else:
             for s in citations:
+                index = s.get("index")
+                index_value = f"[{index}] " if index is not None else ""
                 st.markdown(
-                    f"**{s.get('id')}** (score: {round(s.get('score', 0.0), 3)})"
+                    f"**{index_value}{s.get('id')}** (score: {round(s.get('score', 0.0), 3)})"
                 )
                 st.write(s.get("text", ""))
     

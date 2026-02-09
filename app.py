@@ -315,9 +315,16 @@ def ask(q: str):
                 )
             else:
                 confidence = score_to_confidence(top_score)
+                # Attach a stable 1-based index so the UI can show [1], [2], etc.
+                # that line up with the citation markers in the answer.
                 citations = [
-                    {"id": s["id"], "text": s["text"], "score": float(s["score"])}
-                    for s in sources
+                    {
+                        "index": i,
+                        "id": s["id"],
+                        "text": s["text"],
+                        "score": float(s["score"]),
+                    }
+                    for i, s in enumerate(sources, start=1)
                 ]
 
     response = {
