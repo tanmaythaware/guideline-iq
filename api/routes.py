@@ -1,26 +1,45 @@
+"""
+FastAPI routes for Guideline IQ.
+
+The /ask implementation is structurally identical to the existing logic:
+- domain classification guardrail
+- retrieval with embeddings + cosine similarity
+- grounded generation
+- strict refusals (no citations on refusals)
+- JSONL logging for auditability
+"""
+
+from __future__ import annotations
+
 from contextlib import asynccontextmanager
 import logging
-
-from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
-
-from ingest import docs
-from rag_core import InMemoryVectorStore, generate_answer, classify_query_domain, SafeFailureError
-import json
 import time
 import uuid
-from pathlib import Path
-from prompts import REFUSAL_TEXT, SAFE_FAILURE_TEXT
+from typing import Optional
+
+from fastapi import APIRouter, FastAPI, HTTPException, Query
+
+from ingest.loader import load_docs
+from rag.core import InMemoryVectorStore
+from rag.llm import SafeFailureError, classify_query_domain, generate_answer
+from rag.prompts import REFUSAL_TEXT, SAFE_FAILURE_TEXT
+
+from .logging_utils import log_refusal, log_response
+from .schemas import AskResponse
+from .settings import (
+    DATA_PATH,
+    DOMAIN_CONF_THRESHOLD,
+    RETRIEVAL_SCORE_THRESHOLD,
+    TOP_K,
+)
 
 
-load_dotenv()
-
-# Configure simple, readable logs for local development.
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("guideline_iq")
 
+router = APIRouter()
+
 store = InMemoryVectorStore()
-startup_error: str | None = None
+startup_error: Optional[str] = None
 
 
 @asynccontextmanager
@@ -28,66 +47,15 @@ async def lifespan(_: FastAPI):
     """Initialize embeddings once at startup; keep app alive on failure."""
     global startup_error
     try:
-        # Precompute embeddings for the static guideline docs.
+        docs = load_docs(DATA_PATH)
         logger.info("Startup: embedding %d guideline docs.", len(docs))
         store.add(docs)
         logger.info("Startup: embeddings ready.")
     except Exception as exc:
-        # Avoid crashing the app; surface a clear message on /ask.
         startup_error = str(exc)
         logger.exception("Startup: embedding failed.")
     yield
 
-
-app = FastAPI(lifespan=lifespan)
-
-LOG_DIR = Path("logs")
-REFUSAL_LOG = LOG_DIR / "refusals.jsonl"
-ALL_LOG = LOG_DIR / "responses.jsonl"
-
-# Policy thresholds for guardrails.
-DOMAIN_CONF_THRESHOLD = 0.6
-RETRIEVAL_SCORE_THRESHOLD = 0.6
-
-
-def log_refusal(
-    request_id: str,
-    query: str,
-    sources: list[dict],
-    reason: str,
-    *,
-    classifier: dict | None = None,
-    top_score: float | None = None,
-) -> None:
-    try:
-        LOG_DIR.mkdir(exist_ok=True)
-        entry = {
-            "event": "refusal",
-            "request_id": request_id,
-            "query": query,
-            "retrieved": [
-                {"id": s["id"], "score": float(s.get("score", 0.0))}
-                for s in sources
-            ],
-            "reason": reason,
-            "classifier": classifier,
-            "top_score": float(top_score) if top_score is not None else None,
-            "ts": time.time(),
-        }
-        with REFUSAL_LOG.open("a") as f:
-            f.write(json.dumps(entry) + "\n")
-    except Exception as exc:  # keep the request from failing if logging fails
-        logger.exception("Failed to log refusal: %s", exc)
-
-def log_response(payload: dict) -> None:
-    try:
-        LOG_DIR.mkdir(exist_ok=True)
-        entry = dict(payload)
-        entry["ts"] = time.time()
-        with ALL_LOG.open("a") as f:
-            f.write(json.dumps(entry) + "\n")
-    except Exception as exc:  # keep the request from failing if logging fails
-        logger.exception("Failed to log response: %s", exc)
 
 def score_to_confidence(score: float) -> str:
     if score >= 0.6:
@@ -104,13 +72,10 @@ def _safe_failure_response(
     *,
     classifier: dict | None = None,
     sources: list[dict] | None = None,
-) -> dict:
-    """
-    Return a safe refusal response when OpenAI API calls fail after retries.
-    """
+) -> AskResponse:
     sources = sources or []
     top_score = float(sources[0]["score"]) if sources else 0.0
-    
+
     log_refusal(
         request_id,
         query,
@@ -119,8 +84,8 @@ def _safe_failure_response(
         classifier=classifier,
         top_score=top_score if sources else None,
     )
-    
-    response = {
+
+    payload = {
         "request_id": request_id,
         "query": query,
         "answer": SAFE_FAILURE_TEXT,
@@ -142,36 +107,56 @@ def _safe_failure_response(
             "duration_ms": 0.0,
         },
     }
-    
+
     logger.info(
         "request_id=%s event=request_end decision=refuse reason=%s",
         request_id,
         failure_reason,
     )
-    log_response(response)
-    return response
+    log_response(payload)
+    return AskResponse(**payload)
 
 
-@app.get("/ask")
-def ask(q: str):
+@router.get("/health")
+def health():
+    return {"status": "ok"}
+
+
+@router.get("/ready")
+def ready():
+    if startup_error:
+        return {"status": "error", "detail": startup_error}
+    return {"status": "ok"}
+
+
+@router.get("/ask", response_model=AskResponse)
+def ask(q: str = Query(..., description="User question")):
     request_id = str(uuid.uuid4())
     logger.info("request_id=%s event=request_start q=%s", request_id, q)
 
     if startup_error:
-        logger.error("request_id=%s embeddings unavailable: %s", request_id, startup_error)
+        logger.error(
+            "request_id=%s embeddings unavailable: %s", request_id, startup_error
+        )
         raise HTTPException(
             status_code=503,
-            detail="Embeddings unavailable during startup. Check OPENAI_API_KEY and restart.",
+            detail=(
+                "Embeddings unavailable during startup. "
+                "Check OPENAI_API_KEY and restart."
+            ),
         )
 
-    # 1) Domain classification guardrail: is this even a finance/compliance question?
+    # 1) Domain classification guardrail.
     cls_start = time.perf_counter()
     try:
         classifier = classify_query_domain(q)
     except SafeFailureError as exc:
-        logger.error("request_id=%s classification failed after retries: %s", request_id, exc)
+        logger.error(
+            "request_id=%s classification failed after retries: %s", request_id, exc
+        )
         return _safe_failure_response(request_id, q, "classification_failure")
     cls_ms = (time.perf_counter() - cls_start) * 1000
+
     classifier_label = classifier.get("label", "unsure")
     classifier_conf = float(classifier.get("confidence", 0.0))
     logger.info(
@@ -187,7 +172,6 @@ def ask(q: str):
     )
 
     if not classifier_pass:
-        # Hard refusal: out-of-domain or low classifier confidence.
         sources: list[dict] = []
         retrieval_ms = 0.0
         top_score = 0.0
@@ -206,7 +190,7 @@ def ask(q: str):
             top_score=top_score,
         )
 
-        response = {
+        payload = {
             "request_id": request_id,
             "query": q,
             "answer": answer,
@@ -233,16 +217,20 @@ def ask(q: str):
             confidence,
             top_score,
         )
-        log_response(response)
-        return response
+        log_response(payload)
+        return AskResponse(**payload)
 
-    # 2) Retrieval guardrail: only proceed to generation if we have a strong match.
+    # 2) Retrieval guardrail.
     retrieval_start = time.perf_counter()
     try:
-        sources = store.query(q, top_k=2)
+        sources = store.query(q, top_k=TOP_K)
     except SafeFailureError as exc:
-        logger.error("request_id=%s retrieval failed after retries: %s", request_id, exc)
-        return _safe_failure_response(request_id, q, "retrieval_failure", classifier=classifier)
+        logger.error(
+            "request_id=%s retrieval failed after retries: %s", request_id, exc
+        )
+        return _safe_failure_response(
+            request_id, q, "retrieval_failure", classifier=classifier
+        )
     retrieval_ms = (time.perf_counter() - retrieval_start) * 1000
     logger.info(
         "request_id=%s event=retrieval_end ms=%.1f results=%d",
@@ -269,7 +257,6 @@ def ask(q: str):
     else:
         top_score = float(sources[0]["score"])
         if top_score < RETRIEVAL_SCORE_THRESHOLD:
-            # Too weak a match: refuse before any generation to save cost and avoid stretching sources.
             answer = REFUSAL_TEXT
             decision = "refuse"
             confidence = "low"
@@ -284,23 +271,32 @@ def ask(q: str):
                 top_score=top_score,
             )
         else:
-            # 3) Generation: we have an in-domain query AND strong retrieval.
+            # 3) Generation.
             gen_start = time.perf_counter()
             try:
                 answer = generate_answer(q, sources)
             except SafeFailureError as exc:
-                logger.error("request_id=%s generation failed after retries: %s", request_id, exc)
+                logger.error(
+                    "request_id=%s generation failed after retries: %s",
+                    request_id,
+                    exc,
+                )
                 return _safe_failure_response(
-                    request_id, q, "generation_failure", classifier=classifier, sources=sources
+                    request_id,
+                    q,
+                    "generation_failure",
+                    classifier=classifier,
+                    sources=sources,
                 )
             gen_ms = (time.perf_counter() - gen_start) * 1000
-            logger.info("request_id=%s event=generation_end ms=%.1f", request_id, gen_ms)
+            logger.info(
+                "request_id=%s event=generation_end ms=%.1f", request_id, gen_ms
+            )
 
             decision = "answer"
             reason = None
 
             if REFUSAL_TEXT in answer:
-                # LLM itself refused given the provided sources.
                 decision = "refuse"
                 reason = "llm_refusal"
                 confidence = "low"
@@ -315,8 +311,6 @@ def ask(q: str):
                 )
             else:
                 confidence = score_to_confidence(top_score)
-                # Attach a stable 1-based index so the UI can show [1], [2], etc.
-                # that line up with the citation markers in the answer.
                 citations = [
                     {
                         "index": i,
@@ -327,7 +321,7 @@ def ask(q: str):
                     for i, s in enumerate(sources, start=1)
                 ]
 
-    response = {
+    payload = {
         "request_id": request_id,
         "query": q,
         "answer": answer,
@@ -341,7 +335,7 @@ def ask(q: str):
         },
         "refusal_reason": reason if decision == "refuse" else None,
         "retrieval": {
-            "top_k": 2,
+            "top_k": TOP_K,
             "results": [
                 {"id": s["id"], "score": float(s.get("score", 0.0))}
                 for s in sources
@@ -357,5 +351,9 @@ def ask(q: str):
         confidence,
         float(top_score),
     )
-    log_response(response)
-    return response
+    log_response(payload)
+    return AskResponse(**payload)
+
+
+__all__ = ["router", "lifespan"]
+
