@@ -2,8 +2,12 @@
   "meta": {
     "dataset": "evals/datasets/golden.jsonl",
     "api_base_url": "http://localhost:8000",
-    "timestamp": "20260212_150822",
-    "num_cases": 30
+    "timestamp": "20260220_184952",
+    "num_cases": 30,
+    "usage": {
+      "total_tokens": 11119,
+      "estimated_cost_usd": 0.00196107
+    }
   },
   "summary": {
     "total_cases": 30,
@@ -17,7 +21,9 @@
     "empty_retrieval_rate": 0.2,
     "answer_citation_compliance": 1.0,
     "recall_at_k": 1.0,
-    "k": 5
+    "k": 5,
+    "total_api_tokens": 11119,
+    "total_api_cost_usd": 0.00196107
   },
   "breakdowns": {
     "reason_confusion": {
@@ -51,7 +57,7 @@
         "gold_chunk_ids": [],
         "status_code": 200,
         "error": null,
-        "latency_ms": 652,
+        "latency_ms": 801,
         "actual_decision": "refuse",
         "actual_reason": "out_of_domain",
         "had_citations": false,
@@ -60,7 +66,24 @@
         "retrieved_ids": [],
         "retrieved_scores": [],
         "top_score": null,
-        "retrieval_duration_ms": 0.0
+        "retrieval_duration_ms": 0.0,
+        "usage": {
+          "classifier": {
+            "prompt_tokens": 159,
+            "completion_tokens": 14,
+            "total_tokens": 173
+          },
+          "retrieval_embedding": {
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "total_tokens": 0
+          },
+          "generation": null,
+          "total_tokens": 173,
+          "estimated_cost_usd": 2.595e-05
+        },
+        "total_tokens": 173,
+        "estimated_cost_usd": 2.595e-05
       },
       {
         "id": "q26",
@@ -70,7 +93,7 @@
         "gold_chunk_ids": [],
         "status_code": 200,
         "error": null,
-        "latency_ms": 783,
+        "latency_ms": 1023,
         "actual_decision": "refuse",
         "actual_reason": "out_of_domain",
         "had_citations": false,
@@ -79,7 +102,24 @@
         "retrieved_ids": [],
         "retrieved_scores": [],
         "top_score": null,
-        "retrieval_duration_ms": 0.0
+        "retrieval_duration_ms": 0.0,
+        "usage": {
+          "classifier": {
+            "prompt_tokens": 154,
+            "completion_tokens": 16,
+            "total_tokens": 170
+          },
+          "retrieval_embedding": {
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "total_tokens": 0
+          },
+          "generation": null,
+          "total_tokens": 170,
+          "estimated_cost_usd": 2.55e-05
+        },
+        "total_tokens": 170,
+        "estimated_cost_usd": 2.55e-05
       },
       {
         "id": "q27",
@@ -89,16 +129,33 @@
         "gold_chunk_ids": [],
         "status_code": 200,
         "error": null,
-        "latency_ms": 619,
+        "latency_ms": 1545,
         "actual_decision": "refuse",
         "actual_reason": "out_of_domain",
         "had_citations": false,
         "classifier_label": "non_finance",
-        "classifier_confidence": 0.95,
+        "classifier_confidence": 1.0,
         "retrieved_ids": [],
         "retrieved_scores": [],
         "top_score": null,
-        "retrieval_duration_ms": 0.0
+        "retrieval_duration_ms": 0.0,
+        "usage": {
+          "classifier": {
+            "prompt_tokens": 158,
+            "completion_tokens": 14,
+            "total_tokens": 172
+          },
+          "retrieval_embedding": {
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "total_tokens": 0
+          },
+          "generation": null,
+          "total_tokens": 172,
+          "estimated_cost_usd": 2.58e-05
+        },
+        "total_tokens": 172,
+        "estimated_cost_usd": 2.58e-05
       },
       {
         "id": "q28",
@@ -108,7 +165,7 @@
         "gold_chunk_ids": [],
         "status_code": 200,
         "error": null,
-        "latency_ms": 667,
+        "latency_ms": 679,
         "actual_decision": "refuse",
         "actual_reason": "out_of_domain",
         "had_citations": false,
@@ -117,7 +174,24 @@
         "retrieved_ids": [],
         "retrieved_scores": [],
         "top_score": null,
-        "retrieval_duration_ms": 0.0
+        "retrieval_duration_ms": 0.0,
+        "usage": {
+          "classifier": {
+            "prompt_tokens": 155,
+            "completion_tokens": 16,
+            "total_tokens": 171
+          },
+          "retrieval_embedding": {
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "total_tokens": 0
+          },
+          "generation": null,
+          "total_tokens": 171,
+          "estimated_cost_usd": 2.565e-05
+        },
+        "total_tokens": 171,
+        "estimated_cost_usd": 2.565e-05
       },
       {
         "id": "q29",
@@ -127,7 +201,7 @@
         "gold_chunk_ids": [],
         "status_code": 200,
         "error": null,
-        "latency_ms": 693,
+        "latency_ms": 952,
         "actual_decision": "refuse",
         "actual_reason": "out_of_domain",
         "had_citations": false,
@@ -136,7 +210,24 @@
         "retrieved_ids": [],
         "retrieved_scores": [],
         "top_score": null,
-        "retrieval_duration_ms": 0.0
+        "retrieval_duration_ms": 0.0,
+        "usage": {
+          "classifier": {
+            "prompt_tokens": 158,
+            "completion_tokens": 16,
+            "total_tokens": 174
+          },
+          "retrieval_embedding": {
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "total_tokens": 0
+          },
+          "generation": null,
+          "total_tokens": 174,
+          "estimated_cost_usd": 2.61e-05
+        },
+        "total_tokens": 174,
+        "estimated_cost_usd": 2.61e-05
       }
     ],
     "answer_missing_citations": []

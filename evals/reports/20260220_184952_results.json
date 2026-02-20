@@ -1,0 +1,1348 @@
+{
+  "meta": {
+    "dataset": "evals/datasets/golden.jsonl",
+    "api_base_url": "http://localhost:8000",
+    "timestamp": "20260220_184952",
+    "num_cases": 30,
+    "usage": {
+      "total_tokens": 11119,
+      "estimated_cost_usd": 0.00196107
+    }
+  },
+  "cases": [
+    {
+      "id": "q01",
+      "query": "What kind of risk warnings should firms provide to retail consumers when offering cryptoasset services?",
+      "expected_decision": "answer",
+      "expected_reason": null,
+      "gold_chunk_ids": [
+        "fca_ps20_10_crypto_1",
+        "fca_ps20_10_crypto_2"
+      ],
+      "status_code": 200,
+      "error": null,
+      "latency_ms": 2989,
+      "actual_decision": "answer",
+      "actual_reason": null,
+      "had_citations": true,
+      "classifier_label": "finance",
+      "classifier_confidence": 0.9,
+      "retrieved_ids": [
+        "fca_ps20_10_crypto_1",
+        "fca_ps20_10_crypto_2"
+      ],
+      "retrieved_scores": [
+        0.8848350644111633,
+        0.8167062997817993
+      ],
+      "top_score": 0.8848350644111633,
+      "retrieval_duration_ms": 831.0782910011767,
+      "usage": {
+        "classifier": {
+          "prompt_tokens": 166,
+          "completion_tokens": 14,
+          "total_tokens": 180
+        },
+        "retrieval_embedding": {
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 17
+        },
+        "generation": {
+          "prompt_tokens": 272,
+          "completion_tokens": 42,
+          "total_tokens": 314
+        },
+        "total_tokens": 511,
+        "estimated_cost_usd": 9.334e-05
+      },
+      "total_tokens": 511,
+      "estimated_cost_usd": 9.334e-05
+    },
+    {
+      "id": "q02",
+      "query": "Why are clear and prominent risk warnings important for cryptoassets?",
+      "expected_decision": "answer",
+      "expected_reason": null,
+      "gold_chunk_ids": [
+        "fca_ps20_10_crypto_1",
+        "fca_ps20_10_crypto_2"
+      ],
+      "status_code": 200,
+      "error": null,
+      "latency_ms": 1936,
+      "actual_decision": "answer",
+      "actual_reason": null,
+      "had_citations": true,
+      "classifier_label": "finance",
+      "classifier_confidence": 0.9,
+      "retrieved_ids": [
+        "fca_ps20_10_crypto_2",
+        "fca_ps20_10_crypto_1"
+      ],
+      "retrieved_scores": [
+        0.7472041845321655,
+        0.7433911561965942
+      ],
+      "top_score": 0.7472041845321655,
+      "retrieval_duration_ms": 145.22525000211317,
+      "usage": {
+        "classifier": {
+          "prompt_tokens": 161,
+          "completion_tokens": 14,
+          "total_tokens": 175
+        },
+        "retrieval_embedding": {
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 12
+        },
+        "generation": {
+          "prompt_tokens": 267,
+          "completion_tokens": 48,
+          "total_tokens": 315
+        },
+        "total_tokens": 502,
+        "estimated_cost_usd": 9.533999999999999e-05
+      },
+      "total_tokens": 502,
+      "estimated_cost_usd": 9.533999999999999e-05
+    },
+    {
+      "id": "q03",
+      "query": "What should cryptoasset risk warnings help retail consumers understand?",
+      "expected_decision": "answer",
+      "expected_reason": null,
+      "gold_chunk_ids": [
+        "fca_ps20_10_crypto_2"
+      ],
+      "status_code": 200,
+      "error": null,
+      "latency_ms": 3053,
+      "actual_decision": "answer",
+      "actual_reason": null,
+      "had_citations": true,
+      "classifier_label": "finance",
+      "classifier_confidence": 0.9,
+      "retrieved_ids": [
+        "fca_ps20_10_crypto_2",
+        "fca_ps20_10_crypto_1"
+      ],
+      "retrieved_scores": [
+        0.8857311010360718,
+        0.8016701936721802
+      ],
+      "top_score": 0.8857311010360718,
+      "retrieval_duration_ms": 203.29395899898373,
+      "usage": {
+        "classifier": {
+          "prompt_tokens": 160,
+          "completion_tokens": 14,
+          "total_tokens": 174
+        },
+        "retrieval_embedding": {
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 11
+        },
+        "generation": {
+          "prompt_tokens": 266,
+          "completion_tokens": 20,
+          "total_tokens": 286
+        },
+        "total_tokens": 471,
+        "estimated_cost_usd": 7.821999999999999e-05
+      },
+      "total_tokens": 471,
+      "estimated_cost_usd": 7.821999999999999e-05
+    },
+    {
+      "id": "q04",
+      "query": "How should firms avoid misleading retail consumers when communicating about cryptoassets?",
+      "expected_decision": "answer",
+      "expected_reason": null,
+      "gold_chunk_ids": [
+        "fca_ps20_10_crypto_3"
+      ],
+      "status_code": 200,
+      "error": null,
+      "latency_ms": 2233,
+      "actual_decision": "answer",
+      "actual_reason": null,
+      "had_citations": true,
+      "classifier_label": "finance",
+      "classifier_confidence": 0.9,
+      "retrieved_ids": [
+        "fca_ps20_10_crypto_1",
+        "fca_ps20_10_crypto_3"
+      ],
+      "retrieved_scores": [
+        0.7162885665893555,
+        0.6967177391052246
+      ],
+      "top_score": 0.7162885665893555,
+      "retrieval_duration_ms": 132.43612500082236,
+      "usage": {
+        "classifier": {
+          "prompt_tokens": 162,
+          "completion_tokens": 14,
+          "total_tokens": 176
+        },
+        "retrieval_embedding": {
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 13
+        },
+        "generation": {
+          "prompt_tokens": 269,
+          "completion_tokens": 42,
+          "total_tokens": 311
+        },
+        "total_tokens": 500,
+        "estimated_cost_usd": 9.221e-05
+      },
+      "total_tokens": 500,
+      "estimated_cost_usd": 9.221e-05
+    },
+    {
+      "id": "q05",
+      "query": "Can crypto promotions focus only on benefits without mentioning risks?",
+      "expected_decision": "answer",
+      "expected_reason": null,
+      "gold_chunk_ids": [
+        "fca_ps20_10_crypto_3"
+      ],
+      "status_code": 200,
+      "error": null,
+      "latency_ms": 1906,
+      "actual_decision": "answer",
+      "actual_reason": null,
+      "had_citations": true,
+      "classifier_label": "finance",
+      "classifier_confidence": 0.9,
+      "retrieved_ids": [
+        "fca_ps20_10_crypto_3",
+        "fca_ps20_10_crypto_2"
+      ],
+      "retrieved_scores": [
+        0.6853039860725403,
+        0.5594112873077393
+      ],
+      "top_score": 0.6853039860725403,
+      "retrieval_duration_ms": 435.4114159978053,
+      "usage": {
+        "classifier": {
+          "prompt_tokens": 160,
+          "completion_tokens": 14,
+          "total_tokens": 174
+        },
+        "retrieval_embedding": {
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 11
+        },
+        "generation": {
+          "prompt_tokens": 266,
+          "completion_tokens": 40,
+          "total_tokens": 306
+        },
+        "total_tokens": 491,
+        "estimated_cost_usd": 9.022e-05
+      },
+      "total_tokens": 491,
+      "estimated_cost_usd": 9.022e-05
+    },
+    {
+      "id": "q06",
+      "query": "What are FCA expectations for balancing risks and benefits in cryptoasset communications?",
+      "expected_decision": "answer",
+      "expected_reason": null,
+      "gold_chunk_ids": [
+        "fca_ps20_10_crypto_3"
+      ],
+      "status_code": 200,
+      "error": null,
+      "latency_ms": 3972,
+      "actual_decision": "answer",
+      "actual_reason": null,
+      "had_citations": true,
+      "classifier_label": "finance",
+      "classifier_confidence": 0.9,
+      "retrieved_ids": [
+        "fca_ps20_10_crypto_3",
+        "fca_ps20_10_crypto_1"
+      ],
+      "retrieved_scores": [
+        0.7205619812011719,
+        0.5857470035552979
+      ],
+      "top_score": 0.7205619812011719,
+      "retrieval_duration_ms": 1889.2280000000028,
+      "usage": {
+        "classifier": {
+          "prompt_tokens": 163,
+          "completion_tokens": 14,
+          "total_tokens": 177
+        },
+        "retrieval_embedding": {
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 15
+        },
+        "generation": {
+          "prompt_tokens": 270,
+          "completion_tokens": 40,
+          "total_tokens": 310
+        },
+        "total_tokens": 502,
+        "estimated_cost_usd": 9.135e-05
+      },
+      "total_tokens": 502,
+      "estimated_cost_usd": 9.135e-05
+    },
+    {
+      "id": "q07",
+      "query": "What is the FCA requirement for financial promotions?",
+      "expected_decision": "answer",
+      "expected_reason": null,
+      "gold_chunk_ids": [
+        "fca_fin_promos_1"
+      ],
+      "status_code": 200,
+      "error": null,
+      "latency_ms": 1983,
+      "actual_decision": "answer",
+      "actual_reason": null,
+      "had_citations": true,
+      "classifier_label": "finance",
+      "classifier_confidence": 0.95,
+      "retrieved_ids": [
+        "fca_fin_promos_1",
+        "fca_ps20_10_crypto_1"
+      ],
+      "retrieved_scores": [
+        0.6362999677658081,
+        0.42365801334381104
+      ],
+      "top_score": 0.6362999677658081,
+      "retrieval_duration_ms": 176.12737499803188,
+      "usage": {
+        "classifier": {
+          "prompt_tokens": 158,
+          "completion_tokens": 14,
+          "total_tokens": 172
+        },
+        "retrieval_embedding": {
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 10
+        },
+        "generation": {
+          "prompt_tokens": 257,
+          "completion_tokens": 15,
+          "total_tokens": 272
+        },
+        "total_tokens": 454,
+        "estimated_cost_usd": 7.355e-05
+      },
+      "total_tokens": 454,
+      "estimated_cost_usd": 7.355e-05
+    },
+    {
+      "id": "q08",
+      "query": "What does it mean for a financial promotion to be fair, clear and not misleading?",
+      "expected_decision": "answer",
+      "expected_reason": null,
+      "gold_chunk_ids": [
+        "fca_fin_promos_1"
+      ],
+      "status_code": 200,
+      "error": null,
+      "latency_ms": 2505,
+      "actual_decision": "answer",
+      "actual_reason": null,
+      "had_citations": true,
+      "classifier_label": "finance",
+      "classifier_confidence": 0.95,
+      "retrieved_ids": [
+        "fca_fin_promos_1",
+        "fca_fin_promos_3"
+      ],
+      "retrieved_scores": [
+        0.815284252166748,
+        0.4516220688819885
+      ],
+      "top_score": 0.815284252166748,
+      "retrieval_duration_ms": 152.95116700144717,
+      "usage": {
+        "classifier": {
+          "prompt_tokens": 166,
+          "completion_tokens": 14,
+          "total_tokens": 180
+        },
+        "retrieval_embedding": {
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 17
+        },
+        "generation": {
+          "prompt_tokens": 267,
+          "completion_tokens": 60,
+          "total_tokens": 327
+        },
+        "total_tokens": 524,
+        "estimated_cost_usd": 0.00010339
+      },
+      "total_tokens": 524,
+      "estimated_cost_usd": 0.00010339
+    },
+    {
+      "id": "q09",
+      "query": "How should risk disclosures be presented to the intended audience?",
+      "expected_decision": "answer",
+      "expected_reason": null,
+      "gold_chunk_ids": [
+        "fca_fin_promos_2"
+      ],
+      "status_code": 200,
+      "error": null,
+      "latency_ms": 2475,
+      "actual_decision": "answer",
+      "actual_reason": null,
+      "had_citations": true,
+      "classifier_label": "finance",
+      "classifier_confidence": 0.9,
+      "retrieved_ids": [
+        "fca_fin_promos_2",
+        "fca_risk_warnings_2"
+      ],
+      "retrieved_scores": [
+        0.8314989805221558,
+        0.6364758610725403
+      ],
+      "top_score": 0.8314989805221558,
+      "retrieval_duration_ms": 142.42899999953806,
+      "usage": {
+        "classifier": {
+          "prompt_tokens": 160,
+          "completion_tokens": 14,
+          "total_tokens": 174
+        },
+        "retrieval_embedding": {
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 11
+        },
+        "generation": {
+          "prompt_tokens": 272,
+          "completion_tokens": 50,
+          "total_tokens": 322
+        },
+        "total_tokens": 507,
+        "estimated_cost_usd": 9.711999999999999e-05
+      },
+      "total_tokens": 507,
+      "estimated_cost_usd": 9.711999999999999e-05
+    },
+    {
+      "id": "q10",
+      "query": "Where should risk disclosures be placed so that consumers understand them?",
+      "expected_decision": "answer",
+      "expected_reason": null,
+      "gold_chunk_ids": [
+        "fca_fin_promos_2"
+      ],
+      "status_code": 200,
+      "error": null,
+      "latency_ms": 3526,
+      "actual_decision": "answer",
+      "actual_reason": null,
+      "had_citations": true,
+      "classifier_label": "finance",
+      "classifier_confidence": 0.9,
+      "retrieved_ids": [
+        "fca_fin_promos_2",
+        "fca_risk_warnings_1"
+      ],
+      "retrieved_scores": [
+        0.6917398571968079,
+        0.6739500761032104
+      ],
+      "top_score": 0.6917398571968079,
+      "retrieval_duration_ms": 357.1997499966528,
+      "usage": {
+        "classifier": {
+          "prompt_tokens": 161,
+          "completion_tokens": 14,
+          "total_tokens": 175
+        },
+        "retrieval_embedding": {
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 12
+        },
+        "generation": {
+          "prompt_tokens": 271,
+          "completion_tokens": 48,
+          "total_tokens": 319
+        },
+        "total_tokens": 506,
+        "estimated_cost_usd": 9.593999999999998e-05
+      },
+      "total_tokens": 506,
+      "estimated_cost_usd": 9.593999999999998e-05
+    },
+    {
+      "id": "q11",
+      "query": "What practices should firms avoid when presenting important warnings?",
+      "expected_decision": "answer",
+      "expected_reason": null,
+      "gold_chunk_ids": [
+        "fca_fin_promos_3"
+      ],
+      "status_code": 200,
+      "error": null,
+      "latency_ms": 1669,
+      "actual_decision": "answer",
+      "actual_reason": null,
+      "had_citations": true,
+      "classifier_label": "finance",
+      "classifier_confidence": 0.9,
+      "retrieved_ids": [
+        "fca_fin_promos_3",
+        "fca_risk_warnings_1"
+      ],
+      "retrieved_scores": [
+        0.7913897633552551,
+        0.6327282786369324
+      ],
+      "top_score": 0.7913897633552551,
+      "retrieval_duration_ms": 149.94683400072972,
+      "usage": {
+        "classifier": {
+          "prompt_tokens": 159,
+          "completion_tokens": 14,
+          "total_tokens": 173
+        },
+        "retrieval_embedding": {
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 10
+        },
+        "generation": {
+          "prompt_tokens": 269,
+          "completion_tokens": 24,
+          "total_tokens": 293
+        },
+        "total_tokens": 476,
+        "estimated_cost_usd": 8.09e-05
+      },
+      "total_tokens": 476,
+      "estimated_cost_usd": 8.09e-05
+    },
+    {
+      "id": "q12",
+      "query": "Why is disguising or obscuring warnings considered problematic in financial promotions?",
+      "expected_decision": "answer",
+      "expected_reason": null,
+      "gold_chunk_ids": [
+        "fca_fin_promos_3"
+      ],
+      "status_code": 200,
+      "error": null,
+      "latency_ms": 3062,
+      "actual_decision": "answer",
+      "actual_reason": null,
+      "had_citations": true,
+      "classifier_label": "finance",
+      "classifier_confidence": 0.9,
+      "retrieved_ids": [
+        "fca_fin_promos_3",
+        "fca_risk_warnings_1"
+      ],
+      "retrieved_scores": [
+        0.6637040376663208,
+        0.6419847011566162
+      ],
+      "top_score": 0.6637040376663208,
+      "retrieval_duration_ms": 340.2868339981069,
+      "usage": {
+        "classifier": {
+          "prompt_tokens": 163,
+          "completion_tokens": 14,
+          "total_tokens": 177
+        },
+        "retrieval_embedding": {
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 14
+        },
+        "generation": {
+          "prompt_tokens": 273,
+          "completion_tokens": 54,
+          "total_tokens": 327
+        },
+        "total_tokens": 518,
+        "estimated_cost_usd": 0.00010018
+      },
+      "total_tokens": 518,
+      "estimated_cost_usd": 0.00010018
+    },
+    {
+      "id": "q13",
+      "query": "How should risk warnings be positioned to ensure consumers notice them?",
+      "expected_decision": "answer",
+      "expected_reason": null,
+      "gold_chunk_ids": [
+        "fca_risk_warnings_1"
+      ],
+      "status_code": 200,
+      "error": null,
+      "latency_ms": 5678,
+      "actual_decision": "answer",
+      "actual_reason": null,
+      "had_citations": true,
+      "classifier_label": "finance",
+      "classifier_confidence": 0.9,
+      "retrieved_ids": [
+        "fca_risk_warnings_1",
+        "fca_risk_warnings_2"
+      ],
+      "retrieved_scores": [
+        0.8344935774803162,
+        0.6485246419906616
+      ],
+      "top_score": 0.8344935774803162,
+      "retrieval_duration_ms": 3589.8173749992566,
+      "usage": {
+        "classifier": {
+          "prompt_tokens": 161,
+          "completion_tokens": 14,
+          "total_tokens": 175
+        },
+        "retrieval_embedding": {
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 12
+        },
+        "generation": {
+          "prompt_tokens": 272,
+          "completion_tokens": 48,
+          "total_tokens": 320
+        },
+        "total_tokens": 507,
+        "estimated_cost_usd": 9.608999999999998e-05
+      },
+      "total_tokens": 507,
+      "estimated_cost_usd": 9.608999999999998e-05
+    },
+    {
+      "id": "q14",
+      "query": "What makes a risk warning prominent according to FCA guidance?",
+      "expected_decision": "answer",
+      "expected_reason": null,
+      "gold_chunk_ids": [
+        "fca_risk_warnings_1"
+      ],
+      "status_code": 200,
+      "error": null,
+      "latency_ms": 2633,
+      "actual_decision": "answer",
+      "actual_reason": null,
+      "had_citations": true,
+      "classifier_label": "finance",
+      "classifier_confidence": 0.9,
+      "retrieved_ids": [
+        "fca_risk_warnings_1",
+        "fca_risk_warnings_2"
+      ],
+      "retrieved_scores": [
+        0.7278043627738953,
+        0.6181052923202515
+      ],
+      "top_score": 0.7278043627738953,
+      "retrieval_duration_ms": 116.0522909995052,
+      "usage": {
+        "classifier": {
+          "prompt_tokens": 160,
+          "completion_tokens": 14,
+          "total_tokens": 174
+        },
+        "retrieval_embedding": {
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 12
+        },
+        "generation": {
+          "prompt_tokens": 271,
+          "completion_tokens": 46,
+          "total_tokens": 317
+        },
+        "total_tokens": 503,
+        "estimated_cost_usd": 9.459e-05
+      },
+      "total_tokens": 503,
+      "estimated_cost_usd": 9.459e-05
+    },
+    {
+      "id": "q15",
+      "query": "Why should risk warnings use plain language rather than complex wording?",
+      "expected_decision": "answer",
+      "expected_reason": null,
+      "gold_chunk_ids": [
+        "fca_risk_warnings_2"
+      ],
+      "status_code": 200,
+      "error": null,
+      "latency_ms": 2036,
+      "actual_decision": "answer",
+      "actual_reason": null,
+      "had_citations": true,
+      "classifier_label": "finance",
+      "classifier_confidence": 0.9,
+      "retrieved_ids": [
+        "fca_risk_warnings_2",
+        "fca_risk_warnings_1"
+      ],
+      "retrieved_scores": [
+        0.8144024610519409,
+        0.608447790145874
+      ],
+      "top_score": 0.8144024610519409,
+      "retrieval_duration_ms": 163.71420900031808,
+      "usage": {
+        "classifier": {
+          "prompt_tokens": 161,
+          "completion_tokens": 14,
+          "total_tokens": 175
+        },
+        "retrieval_embedding": {
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 12
+        },
+        "generation": {
+          "prompt_tokens": 272,
+          "completion_tokens": 42,
+          "total_tokens": 314
+        },
+        "total_tokens": 501,
+        "estimated_cost_usd": 9.248999999999999e-05
+      },
+      "total_tokens": 501,
+      "estimated_cost_usd": 9.248999999999999e-05
+    },
+    {
+      "id": "q16",
+      "query": "What does the Consumer Duty require firms to do for retail customers?",
+      "expected_decision": "answer",
+      "expected_reason": null,
+      "gold_chunk_ids": [
+        "fca_consumer_duty_1"
+      ],
+      "status_code": 200,
+      "error": null,
+      "latency_ms": 1793,
+      "actual_decision": "answer",
+      "actual_reason": null,
+      "had_citations": true,
+      "classifier_label": "finance",
+      "classifier_confidence": 0.9,
+      "retrieved_ids": [
+        "fca_consumer_duty_1",
+        "fca_consumer_duty_3"
+      ],
+      "retrieved_scores": [
+        0.8010408878326416,
+        0.5935375094413757
+      ],
+      "top_score": 0.8010408878326416,
+      "retrieval_duration_ms": 150.77350000137812,
+      "usage": {
+        "classifier": {
+          "prompt_tokens": 162,
+          "completion_tokens": 14,
+          "total_tokens": 176
+        },
+        "retrieval_embedding": {
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 13
+        },
+        "generation": {
+          "prompt_tokens": 267,
+          "completion_tokens": 36,
+          "total_tokens": 303
+        },
+        "total_tokens": 492,
+        "estimated_cost_usd": 8.830999999999999e-05
+      },
+      "total_tokens": 492,
+      "estimated_cost_usd": 8.830999999999999e-05
+    },
+    {
+      "id": "q17",
+      "query": "How should firms ensure communications support customer understanding under the Consumer Duty?",
+      "expected_decision": "answer",
+      "expected_reason": null,
+      "gold_chunk_ids": [
+        "fca_consumer_duty_2"
+      ],
+      "status_code": 200,
+      "error": null,
+      "latency_ms": 4453,
+      "actual_decision": "answer",
+      "actual_reason": null,
+      "had_citations": true,
+      "classifier_label": "finance",
+      "classifier_confidence": 0.9,
+      "retrieved_ids": [
+        "fca_consumer_duty_2",
+        "fca_consumer_duty_1"
+      ],
+      "retrieved_scores": [
+        0.7507212162017822,
+        0.6483851671218872
+      ],
+      "top_score": 0.7507212162017822,
+      "retrieval_duration_ms": 2802.1030420022726,
+      "usage": {
+        "classifier": {
+          "prompt_tokens": 162,
+          "completion_tokens": 14,
+          "total_tokens": 176
+        },
+        "retrieval_embedding": {
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 13
+        },
+        "generation": {
+          "prompt_tokens": 263,
+          "completion_tokens": 25,
+          "total_tokens": 288
+        },
+        "total_tokens": 477,
+        "estimated_cost_usd": 8.111e-05
+      },
+      "total_tokens": 477,
+      "estimated_cost_usd": 8.111e-05
+    },
+    {
+      "id": "q18",
+      "query": "What role does identifying foreseeable harm play in delivering good customer outcomes?",
+      "expected_decision": "answer",
+      "expected_reason": null,
+      "gold_chunk_ids": [
+        "fca_consumer_duty_3"
+      ],
+      "status_code": 200,
+      "error": null,
+      "latency_ms": 1974,
+      "actual_decision": "answer",
+      "actual_reason": null,
+      "had_citations": true,
+      "classifier_label": "finance",
+      "classifier_confidence": 0.85,
+      "retrieved_ids": [
+        "fca_consumer_duty_3",
+        "fca_consumer_duty_1"
+      ],
+      "retrieved_scores": [
+        0.7820305824279785,
+        0.5738416314125061
+      ],
+      "top_score": 0.7820305824279785,
+      "retrieval_duration_ms": 151.06987499893876,
+      "usage": {
+        "classifier": {
+          "prompt_tokens": 162,
+          "completion_tokens": 14,
+          "total_tokens": 176
+        },
+        "retrieval_embedding": {
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 13
+        },
+        "generation": {
+          "prompt_tokens": 267,
+          "completion_tokens": 60,
+          "total_tokens": 327
+        },
+        "total_tokens": 516,
+        "estimated_cost_usd": 0.00010271
+      },
+      "total_tokens": 516,
+      "estimated_cost_usd": 0.00010271
+    },
+    {
+      "id": "q19",
+      "query": "What is the exact wording required for cryptoasset risk warnings under FCA rules?",
+      "expected_decision": "refuse",
+      "expected_reason": "low_retrieval_score_pre_generation",
+      "gold_chunk_ids": [],
+      "status_code": 200,
+      "error": null,
+      "latency_ms": 2633,
+      "actual_decision": "refuse",
+      "actual_reason": "llm_refusal",
+      "had_citations": false,
+      "classifier_label": "finance",
+      "classifier_confidence": 0.9,
+      "retrieved_ids": [
+        "fca_ps20_10_crypto_1",
+        "fca_ps20_10_crypto_2"
+      ],
+      "retrieved_scores": [
+        0.69753098487854,
+        0.6448023319244385
+      ],
+      "top_score": 0.69753098487854,
+      "retrieval_duration_ms": 1282.6686250009516,
+      "usage": {
+        "classifier": {
+          "prompt_tokens": 164,
+          "completion_tokens": 14,
+          "total_tokens": 178
+        },
+        "retrieval_embedding": {
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 16
+        },
+        "generation": null,
+        "total_tokens": 194,
+        "estimated_cost_usd": 2.702e-05
+      },
+      "total_tokens": 194,
+      "estimated_cost_usd": 2.702e-05
+    },
+    {
+      "id": "q20",
+      "query": "What are the FCA penalties for non-compliant crypto promotions?",
+      "expected_decision": "refuse",
+      "expected_reason": "low_retrieval_score_pre_generation",
+      "gold_chunk_ids": [],
+      "status_code": 200,
+      "error": null,
+      "latency_ms": 903,
+      "actual_decision": "refuse",
+      "actual_reason": "low_retrieval_score_pre_generation",
+      "had_citations": false,
+      "classifier_label": "finance",
+      "classifier_confidence": 0.9,
+      "retrieved_ids": [
+        "fca_ps20_10_crypto_1",
+        "fca_fin_promos_1"
+      ],
+      "retrieved_scores": [
+        0.5249102115631104,
+        0.47927361726760864
+      ],
+      "top_score": 0.5249102115631104,
+      "retrieval_duration_ms": 140.12758299941197,
+      "usage": {
+        "classifier": {
+          "prompt_tokens": 161,
+          "completion_tokens": 14,
+          "total_tokens": 175
+        },
+        "retrieval_embedding": {
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 13
+        },
+        "generation": null,
+        "total_tokens": 188,
+        "estimated_cost_usd": 2.651e-05
+      },
+      "total_tokens": 188,
+      "estimated_cost_usd": 2.651e-05
+    },
+    {
+      "id": "q21",
+      "query": "What specific metrics should firms use to measure Consumer Duty outcomes?",
+      "expected_decision": "refuse",
+      "expected_reason": "low_retrieval_score_pre_generation",
+      "gold_chunk_ids": [],
+      "status_code": 200,
+      "error": null,
+      "latency_ms": 1453,
+      "actual_decision": "refuse",
+      "actual_reason": "llm_refusal",
+      "had_citations": false,
+      "classifier_label": "finance",
+      "classifier_confidence": 0.9,
+      "retrieved_ids": [
+        "fca_consumer_duty_1",
+        "fca_consumer_duty_3"
+      ],
+      "retrieved_scores": [
+        0.629633367061615,
+        0.4066448211669922
+      ],
+      "top_score": 0.629633367061615,
+      "retrieval_duration_ms": 179.17537500034086,
+      "usage": {
+        "classifier": {
+          "prompt_tokens": 161,
+          "completion_tokens": 14,
+          "total_tokens": 175
+        },
+        "retrieval_embedding": {
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 12
+        },
+        "generation": null,
+        "total_tokens": 187,
+        "estimated_cost_usd": 2.649e-05
+      },
+      "total_tokens": 187,
+      "estimated_cost_usd": 2.649e-05
+    },
+    {
+      "id": "q22",
+      "query": "What is the FCA definition of a high-risk investment product?",
+      "expected_decision": "refuse",
+      "expected_reason": "low_retrieval_score_pre_generation",
+      "gold_chunk_ids": [],
+      "status_code": 200,
+      "error": null,
+      "latency_ms": 921,
+      "actual_decision": "refuse",
+      "actual_reason": "low_retrieval_score_pre_generation",
+      "had_citations": false,
+      "classifier_label": "finance",
+      "classifier_confidence": 0.9,
+      "retrieved_ids": [
+        "fca_ps20_10_crypto_1",
+        "fca_ps20_10_crypto_2"
+      ],
+      "retrieved_scores": [
+        0.44661182165145874,
+        0.4022161066532135
+      ],
+      "top_score": 0.44661182165145874,
+      "retrieval_duration_ms": 218.72849999999744,
+      "usage": {
+        "classifier": {
+          "prompt_tokens": 161,
+          "completion_tokens": 14,
+          "total_tokens": 175
+        },
+        "retrieval_embedding": {
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 13
+        },
+        "generation": null,
+        "total_tokens": 188,
+        "estimated_cost_usd": 2.651e-05
+      },
+      "total_tokens": 188,
+      "estimated_cost_usd": 2.651e-05
+    },
+    {
+      "id": "q23",
+      "query": "What exact font size must risk warnings use in online promotions?",
+      "expected_decision": "refuse",
+      "expected_reason": "low_retrieval_score_pre_generation",
+      "gold_chunk_ids": [],
+      "status_code": 200,
+      "error": null,
+      "latency_ms": 819,
+      "actual_decision": "refuse",
+      "actual_reason": "low_retrieval_score_pre_generation",
+      "had_citations": false,
+      "classifier_label": "finance",
+      "classifier_confidence": 0.9,
+      "retrieved_ids": [
+        "fca_risk_warnings_2",
+        "fca_risk_warnings_1"
+      ],
+      "retrieved_scores": [
+        0.5700372457504272,
+        0.5418699979782104
+      ],
+      "top_score": 0.5700372457504272,
+      "retrieval_duration_ms": 125.81504199988558,
+      "usage": {
+        "classifier": {
+          "prompt_tokens": 161,
+          "completion_tokens": 14,
+          "total_tokens": 175
+        },
+        "retrieval_embedding": {
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 12
+        },
+        "generation": null,
+        "total_tokens": 187,
+        "estimated_cost_usd": 2.649e-05
+      },
+      "total_tokens": 187,
+      "estimated_cost_usd": 2.649e-05
+    },
+    {
+      "id": "q24",
+      "query": "What are the record-keeping requirements for approving financial promotions?",
+      "expected_decision": "refuse",
+      "expected_reason": "low_retrieval_score_pre_generation",
+      "gold_chunk_ids": [],
+      "status_code": 200,
+      "error": null,
+      "latency_ms": 943,
+      "actual_decision": "refuse",
+      "actual_reason": "low_retrieval_score_pre_generation",
+      "had_citations": false,
+      "classifier_label": "finance",
+      "classifier_confidence": 0.9,
+      "retrieved_ids": [
+        "fca_fin_promos_1",
+        "fca_fin_promos_2"
+      ],
+      "retrieved_scores": [
+        0.5284675359725952,
+        0.3267395496368408
+      ],
+      "top_score": 0.5284675359725952,
+      "retrieval_duration_ms": 168.83604200120317,
+      "usage": {
+        "classifier": {
+          "prompt_tokens": 161,
+          "completion_tokens": 14,
+          "total_tokens": 175
+        },
+        "retrieval_embedding": {
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 12
+        },
+        "generation": null,
+        "total_tokens": 187,
+        "estimated_cost_usd": 2.649e-05
+      },
+      "total_tokens": 187,
+      "estimated_cost_usd": 2.649e-05
+    },
+    {
+      "id": "q25",
+      "query": "Write a 4-star review for a restaurant.",
+      "expected_decision": "refuse",
+      "expected_reason": "out_of_domain",
+      "gold_chunk_ids": [],
+      "status_code": 200,
+      "error": null,
+      "latency_ms": 801,
+      "actual_decision": "refuse",
+      "actual_reason": "out_of_domain",
+      "had_citations": false,
+      "classifier_label": "non_finance",
+      "classifier_confidence": 1.0,
+      "retrieved_ids": [],
+      "retrieved_scores": [],
+      "top_score": null,
+      "retrieval_duration_ms": 0.0,
+      "usage": {
+        "classifier": {
+          "prompt_tokens": 159,
+          "completion_tokens": 14,
+          "total_tokens": 173
+        },
+        "retrieval_embedding": {
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 0
+        },
+        "generation": null,
+        "total_tokens": 173,
+        "estimated_cost_usd": 2.595e-05
+      },
+      "total_tokens": 173,
+      "estimated_cost_usd": 2.595e-05
+    },
+    {
+      "id": "q26",
+      "query": "Explain Docker vs Kubernetes.",
+      "expected_decision": "refuse",
+      "expected_reason": "out_of_domain",
+      "gold_chunk_ids": [],
+      "status_code": 200,
+      "error": null,
+      "latency_ms": 1023,
+      "actual_decision": "refuse",
+      "actual_reason": "out_of_domain",
+      "had_citations": false,
+      "classifier_label": "non_finance",
+      "classifier_confidence": 0.9,
+      "retrieved_ids": [],
+      "retrieved_scores": [],
+      "top_score": null,
+      "retrieval_duration_ms": 0.0,
+      "usage": {
+        "classifier": {
+          "prompt_tokens": 154,
+          "completion_tokens": 16,
+          "total_tokens": 170
+        },
+        "retrieval_embedding": {
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 0
+        },
+        "generation": null,
+        "total_tokens": 170,
+        "estimated_cost_usd": 2.55e-05
+      },
+      "total_tokens": 170,
+      "estimated_cost_usd": 2.55e-05
+    },
+    {
+      "id": "q27",
+      "query": "What is the best gym routine for beginners?",
+      "expected_decision": "refuse",
+      "expected_reason": "out_of_domain",
+      "gold_chunk_ids": [],
+      "status_code": 200,
+      "error": null,
+      "latency_ms": 1545,
+      "actual_decision": "refuse",
+      "actual_reason": "out_of_domain",
+      "had_citations": false,
+      "classifier_label": "non_finance",
+      "classifier_confidence": 1.0,
+      "retrieved_ids": [],
+      "retrieved_scores": [],
+      "top_score": null,
+      "retrieval_duration_ms": 0.0,
+      "usage": {
+        "classifier": {
+          "prompt_tokens": 158,
+          "completion_tokens": 14,
+          "total_tokens": 172
+        },
+        "retrieval_embedding": {
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 0
+        },
+        "generation": null,
+        "total_tokens": 172,
+        "estimated_cost_usd": 2.58e-05
+      },
+      "total_tokens": 172,
+      "estimated_cost_usd": 2.58e-05
+    },
+    {
+      "id": "q28",
+      "query": "Translate this sentence into Hindi.",
+      "expected_decision": "refuse",
+      "expected_reason": "out_of_domain",
+      "gold_chunk_ids": [],
+      "status_code": 200,
+      "error": null,
+      "latency_ms": 679,
+      "actual_decision": "refuse",
+      "actual_reason": "out_of_domain",
+      "had_citations": false,
+      "classifier_label": "non_finance",
+      "classifier_confidence": 0.9,
+      "retrieved_ids": [],
+      "retrieved_scores": [],
+      "top_score": null,
+      "retrieval_duration_ms": 0.0,
+      "usage": {
+        "classifier": {
+          "prompt_tokens": 155,
+          "completion_tokens": 16,
+          "total_tokens": 171
+        },
+        "retrieval_embedding": {
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 0
+        },
+        "generation": null,
+        "total_tokens": 171,
+        "estimated_cost_usd": 2.565e-05
+      },
+      "total_tokens": 171,
+      "estimated_cost_usd": 2.565e-05
+    },
+    {
+      "id": "q29",
+      "query": "How do I build a React dropdown menu?",
+      "expected_decision": "refuse",
+      "expected_reason": "out_of_domain",
+      "gold_chunk_ids": [],
+      "status_code": 200,
+      "error": null,
+      "latency_ms": 952,
+      "actual_decision": "refuse",
+      "actual_reason": "out_of_domain",
+      "had_citations": false,
+      "classifier_label": "non_finance",
+      "classifier_confidence": 0.9,
+      "retrieved_ids": [],
+      "retrieved_scores": [],
+      "top_score": null,
+      "retrieval_duration_ms": 0.0,
+      "usage": {
+        "classifier": {
+          "prompt_tokens": 158,
+          "completion_tokens": 16,
+          "total_tokens": 174
+        },
+        "retrieval_embedding": {
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 0
+        },
+        "generation": null,
+        "total_tokens": 174,
+        "estimated_cost_usd": 2.61e-05
+      },
+      "total_tokens": 174,
+      "estimated_cost_usd": 2.61e-05
+    },
+    {
+      "id": "q30",
+      "query": "Who won the football match yesterday?",
+      "expected_decision": "refuse",
+      "expected_reason": "out_of_domain",
+      "gold_chunk_ids": [],
+      "status_code": 200,
+      "error": null,
+      "latency_ms": 617,
+      "actual_decision": "refuse",
+      "actual_reason": "out_of_domain",
+      "had_citations": false,
+      "classifier_label": "non_finance",
+      "classifier_confidence": 1.0,
+      "retrieved_ids": [],
+      "retrieved_scores": [],
+      "top_score": null,
+      "retrieval_duration_ms": 0.0,
+      "usage": {
+        "classifier": {
+          "prompt_tokens": 156,
+          "completion_tokens": 14,
+          "total_tokens": 170
+        },
+        "retrieval_embedding": {
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 0
+        },
+        "generation": null,
+        "total_tokens": 170,
+        "estimated_cost_usd": 2.55e-05
+      },
+      "total_tokens": 170,
+      "estimated_cost_usd": 2.55e-05
+    }
+  ]
+}

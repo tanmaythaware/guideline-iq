@@ -1,7 +1,22 @@
 import os
+import sys
+from pathlib import Path
+
 import requests
 import streamlit as st
 from dotenv import load_dotenv
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from evals.report_loader import (
+    eval_value,
+    find_latest_eval_report,
+    fmt_int,
+    fmt_metric_pct,
+    get_last_run_text,
+)
 
 load_dotenv()
 
@@ -30,6 +45,7 @@ def resolve_api_base_url() -> str:
 API_BASE_URL = resolve_api_base_url()
 ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "")
 API_ACCESS_KEY = os.getenv("API_ACCESS_KEY", "")
+EVAL_REPORT_DIR = os.getenv("EVAL_REPORT_DIR", "evals/reports")
 
 st.set_page_config(page_title="GuidelineIQ", page_icon="🤖", layout="centered")
 
@@ -62,14 +78,11 @@ def chip(text: str):
         unsafe_allow_html=True,
     )
 
-def fmt_pct(x: float) -> str:
-    return f"{x*100:.0f}%"
-
 # ---------- Header ----------
 st.title("GuidelineIQ 🤖")
 st.caption("Finance-first guardrailed RAG for regulated answers — grounded when evidence is strong, refusal when it isn’t.")
 
-assistant_tab, audit_tab = st.tabs(["Assistant", "Audit"])
+assistant_tab, audit_tab, evaluation_tab = st.tabs(["Assistant", "Audit Trail", "Evaluation"])
 
 with assistant_tab:
     col1, col2, col3 = st.columns([1, 1, 3])
@@ -267,49 +280,6 @@ with assistant_tab:
             except Exception as e:
                 st.error(f"API error: {e}")
 
-    st.divider()
-
-    # ---------- Eval metrics (latest run) ----------
-    LATEST_EVAL = {
-        "total_cases": 30,
-        "decision_accuracy": 1.0,
-        "refusal_precision": 1.0,
-        "refusal_reason_accuracy": 0.8333,
-        "empty_retrieval_rate": 0.2,
-        "answer_citation_compliance": 1.0,
-        "recall_at_k": 1.0,
-        "k": 5,
-    }
-
-    with st.expander("Evaluation (latest run)", expanded=False):
-        st.caption(
-            f"Golden set: {LATEST_EVAL['total_cases']} labeled cases. "
-            f"Focus: validating guardrail + grounding behavior (not a production benchmark)."
-        )
-
-        c1, c2, c3, c4 = st.columns(4)
-        c1.metric("Decision accuracy", f"{LATEST_EVAL['decision_accuracy']*100:.1f}%")
-        c2.metric("Refusal precision", f"{LATEST_EVAL['refusal_precision']*100:.1f}%")
-        c3.metric("Citation compliance", f"{LATEST_EVAL['answer_citation_compliance']*100:.1f}%")
-        c4.metric(f"Recall@{LATEST_EVAL['k']}", f"{LATEST_EVAL['recall_at_k']*100:.1f}%")
-
-        d1, d2 = st.columns(2)
-        d1.metric("Refusal reason accuracy", f"{LATEST_EVAL['refusal_reason_accuracy']*100:.1f}%")
-        d2.metric("Empty retrieval rate", f"{LATEST_EVAL['empty_retrieval_rate']*100:.1f}%")
-
-        with st.expander("What these mean", expanded=False):
-            st.markdown(
-                f"""
-- **Decision accuracy**: Correct answer vs refuse decisions on the labeled set.
-- **Refusal precision**: When the system refuses, it was expected to refuse.
-- **Refusal reason accuracy**: When refusing, the policy reason label matched the expected reason.
-- **Citation compliance**: Answers always included citations; refusals never included citations.
-- **Recall@{LATEST_EVAL['k']}**: At least one relevant chunk appears in the top-{LATEST_EVAL['k']} retrieval results.
-- **Empty retrieval rate**: Fraction of queries where retrieval returned no chunks.
-            """
-            )
-
-    st.caption("Source: [GitHub](https://github.com/tanmaythaware/guideline-iq)")
 
 with audit_tab:
     with st.expander("Audit logs", expanded=True):
@@ -329,3 +299,68 @@ with audit_tab:
                     st.json(logs)
                 except Exception as exc:
                     st.error(f"Failed to load logs: {exc}")
+
+with evaluation_tab:
+    st.markdown("### Evaluation (latest run)")
+    st.caption("Focus: validating guardrail + grounding behavior (not a production benchmark).")
+
+    source_path, report = find_latest_eval_report(EVAL_REPORT_DIR)
+    if not source_path or not isinstance(report, dict):
+        st.info("No evaluation report found. Run: python evals/run_eval.py to generate one.")
+    else:
+        total_cases = (
+            eval_value(report, "total_cases")
+            or eval_value(report, "evaluated_cases")
+            or (report.get("meta") or {}).get("num_cases")
+        )
+        k_val = eval_value(report, "k")
+        dataset = eval_value(report, "dataset") or (report.get("meta") or {}).get("dataset") or "unknown"
+        recall_val = eval_value(report, "recall_at_k")
+        if recall_val is None:
+            recall_val = eval_value(report, "recall@k")
+        report_meta = report.get("meta") or {}
+        report_meta_usage = report_meta.get("usage") or {}
+        eval_total_tokens = (
+            eval_value(report, "total_api_tokens")
+            or eval_value(report, "total_tokens")
+            or report_meta_usage.get("total_tokens")
+        )
+        eval_total_cost = (
+            eval_value(report, "total_api_cost_usd")
+            or eval_value(report, "estimated_cost_usd")
+            or report_meta_usage.get("estimated_cost_usd")
+            or 0.0
+        )
+
+        st.caption(f"Source: `{source_path}`")
+        st.caption(f"Last run: {get_last_run_text(report, source_path)}")
+        st.caption(f"Dataset: `{dataset}` | Total cases: `{fmt_int(total_cases)}` | K: `{fmt_int(k_val)}`")
+
+        c1, c2, c3, c4 = st.columns(4)
+        c1.metric("Decision accuracy", fmt_metric_pct(eval_value(report, "decision_accuracy")))
+        c2.metric("Refusal precision", fmt_metric_pct(eval_value(report, "refusal_precision")))
+        c3.metric("Citation compliance", fmt_metric_pct(eval_value(report, "answer_citation_compliance")))
+        c4.metric("Recall@K", fmt_metric_pct(recall_val))
+
+        d1, d2 = st.columns(2)
+        d1.metric("Refusal reason accuracy", fmt_metric_pct(eval_value(report, "refusal_reason_accuracy")))
+        d2.metric("Empty retrieval rate", fmt_metric_pct(eval_value(report, "empty_retrieval_rate")))
+        e1, e2 = st.columns(2)
+        e1.metric("Total API tokens", fmt_int(eval_total_tokens))
+        e2.metric("Total API cost (USD)", f"${float(eval_total_cost):.6f}")
+
+        st.caption("Notes: dataset is intentionally small and metrics are for guardrail and grounding validation.")
+
+        k_display = fmt_int(k_val)
+        with st.expander("What these mean", expanded=False):
+            st.markdown(
+                f"""
+- **Decision accuracy**: Correct answer vs refuse decisions on the labeled set.
+- **Refusal precision**: When the system refuses, it was expected to refuse.
+- **Refusal reason accuracy**: When refusing, the policy reason label matched the expected reason.
+- **Citation compliance**: Answers always included citations; refusals never included citations.
+- **Recall@{k_display}**: At least one relevant chunk appears in the top-{k_display} retrieval results.
+- **Empty retrieval rate**: Fraction of queries where retrieval returned no chunks.
+            """
+            )
+    st.caption("Source: [GitHub](https://github.com/tanmaythaware/guideline-iq)")

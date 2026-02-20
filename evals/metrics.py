@@ -76,6 +76,17 @@ def main() -> None:
     refusal_reason_counts = Counter([c.get("actual_reason") for c in ok if c.get("actual_decision") == "refuse"])
     classifier_label_counts = Counter([c.get("classifier_label") for c in ok])
 
+    # 9) API usage and cost summary
+    meta_usage = (data.get("meta") or {}).get("usage") or {}
+    meta_tokens = meta_usage.get("total_tokens")
+    meta_cost = meta_usage.get("estimated_cost_usd")
+    case_tokens = sum(int(c.get("total_tokens", 0) or 0) for c in cases)
+    case_cost = sum(float(c.get("estimated_cost_usd", 0.0) or 0.0) for c in cases)
+    total_api_tokens = int(meta_tokens) if isinstance(meta_tokens, (int, float)) else case_tokens
+    total_api_cost_usd = (
+        float(meta_cost) if isinstance(meta_cost, (int, float)) else case_cost
+    )
+
     # Examples (top failures)
     wrong_decisions = [c for c in eval_cases if c not in decision_correct]
     report = {
@@ -97,6 +108,8 @@ def main() -> None:
             "answer_citation_compliance": round(answer_citation_compliance, 4),
             "recall_at_k": None if recall_k is None else round(recall_k, 4),
             "k": args.k,
+            "total_api_tokens": total_api_tokens,
+            "total_api_cost_usd": round(total_api_cost_usd, 8),
         },
         "breakdowns": {
             "reason_confusion": reason_confusion,

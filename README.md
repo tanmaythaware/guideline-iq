@@ -133,6 +133,7 @@ API_BASE_URL=http://localhost:8000
 ADMIN_TOKEN=some-secret-value
 API_ACCESS_KEY=
 ASK_RATE_LIMIT=10/minute
+EVAL_REPORT_DIR=evals/reports
 ```
 
 Admin logs in the UI are accessible only when `ADMIN_TOKEN` is set and provided.
@@ -143,6 +144,11 @@ The UI sends `X-Admin-Token` to protected `/logs/*` endpoints.
 - `/ask` is rate-limited per IP (default `10/minute`, configurable via `ASK_RATE_LIMIT`).
 - Optional API key protection is available via `API_ACCESS_KEY` and `X-API-Key`.
 - The Streamlit UI automatically sends `X-API-Key` when `API_ACCESS_KEY` is set.
+
+### Evaluation reports
+
+- The Evaluation tab reads metrics from the latest report file on disk under `EVAL_REPORT_DIR` (default `evals/reports`).
+- This is file-based only (no database required), so reports are runtime artifacts and do not need to be committed.
 
 ### **Thresholds Explained**
 
@@ -205,19 +211,43 @@ UI available at `http://localhost:8501`
 
 ## 🖥️ UI Features
 
-The Streamlit interface includes two main tabs:
+The Streamlit interface includes three tabs:
 
 ### **Assistant**
 - Submit finance or compliance questions.
 - View grounded answers with citations.
 - See refusal decisions when queries are out-of-scope or evidence is weak.
 
-### **Audit**
+### **Audit Trail**
 - View structured request logs for transparency and traceability.
 - Inspect classifier decisions, retrieval scores, refusal reasons, and token usage.
 - Filter and review recent requests for debugging and evaluation.
 
-> Note: The Audit tab is protected by an admin token in deployed environments.
+> Note: The Audit Trail tab is protected by an admin token in deployed environments.
+
+### **Evaluation**
+- Loads metrics from the latest evaluation report found on disk (`evals/reports` by default).
+- Displays dataset, total cases, `K`, total API tokens/cost, and the source report path for traceability.
+- If no report exists, the UI shows how to generate one.
+
+### **Generate evaluation reports**
+
+```bash
+# 1) Run evaluation against API and write a timestamped results file
+python evals/run_eval.py --api-base-url http://localhost:8000 --dataset evals/datasets/golden.jsonl
+
+# 2) Compute metrics from that results file
+python evals/metrics.py --results evals/reports/<timestamp>_results.json --k 5
+```
+
+If abuse protection is enabled for your API during local eval runs, temporarily use one of these approaches:
+- Pass the API key used by `/ask`: `python evals/run_eval.py ... --api-key "$API_ACCESS_KEY"`
+- Increase rate limit for the eval window (example): `ASK_RATE_LIMIT=200/minute`
+
+The Evaluation tab displays:
+- Metrics + dataset size + `K`
+- Total API tokens and estimated total API cost for the run
+- The source report filename/path so numbers are traceable
 
 ### **Log Files**
 
@@ -337,7 +367,7 @@ This project is intentionally designed to demonstrate guardrail logic, auditabil
 - **Small evaluation dataset (30 cases)**: Designed to validate guardrail and refusal behavior, not to benchmark large-scale model performance.
 - **Single-node architecture**: Focused on correctness and observability. Production systems would include horizontal scaling and async workers.
 - **Static knowledge base**: Guidelines are loaded at startup. A production version would support incremental updates, versioning, and monitoring for drift.
-- **No authentication layer**: Security concerns such as RBAC, encryption-at-rest, and API rate limiting would be added in a real deployment.
+- **Limited authentication model**: Basic API key + per-IP rate limiting is included; enterprise controls (RBAC, secret rotation, encryption-at-rest) are not yet implemented.
 
 The goal is to clearly demonstrate architectural decisions, safety boundaries, and observability patterns for regulated AI systems.
 

@@ -1,5 +1,6 @@
 import argparse
 import json
+import os
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -36,6 +37,7 @@ def main() -> None:
     parser.add_argument("--dataset", default="evals/datasets/golden.jsonl")
     parser.add_argument("--out", default=None)
     parser.add_argument("--timeout", type=int, default=60)
+    parser.add_argument("--api-key", default=os.getenv("API_ACCESS_KEY", ""))
     args = parser.parse_args()
 
     dataset_path = Path(args.dataset)
@@ -54,6 +56,8 @@ def main() -> None:
         },
         "cases": [],
     }
+    total_api_tokens = 0
+    total_api_cost_usd = 0.0
 
     for case in cases:
         qid = case["id"]
@@ -69,9 +73,11 @@ def main() -> None:
         status_code: Optional[int] = None
 
         try:
+            headers = {"X-API-Key": args.api_key} if args.api_key else {}
             r = requests.get(
                 f"{args.api_base_url}/ask",
                 params={"q": query},
+                headers=headers,
                 timeout=args.timeout,
             )
             status_code = r.status_code
@@ -99,6 +105,12 @@ def main() -> None:
         top_score = retrieved_scores[0] if retrieved_scores else None
 
         retrieval_ms = get_nested(resp_json, ["retrieval", "duration_ms"], default=None) if resp_json else None
+        usage = resp_json.get("usage") if isinstance(resp_json, dict) else None
+        usage = usage if isinstance(usage, dict) else None
+        case_total_tokens = int((usage or {}).get("total_tokens", 0) or 0)
+        case_estimated_cost = float((usage or {}).get("estimated_cost_usd", 0.0) or 0.0)
+        total_api_tokens += case_total_tokens
+        total_api_cost_usd += case_estimated_cost
 
         results["cases"].append(
             {
@@ -124,11 +136,21 @@ def main() -> None:
                 "retrieved_scores": retrieved_scores,
                 "top_score": top_score,
                 "retrieval_duration_ms": retrieval_ms,
+                "usage": usage,
+                "total_tokens": case_total_tokens,
+                "estimated_cost_usd": case_estimated_cost,
             }
         )
 
+    results["meta"]["usage"] = {
+        "total_tokens": total_api_tokens,
+        "estimated_cost_usd": round(total_api_cost_usd, 8),
+    }
     out_path.write_text(json.dumps(results, indent=2), encoding="utf-8")
+    latest_path = out_path.parent / "latest.json"
+    latest_path.write_text(json.dumps(results, indent=2), encoding="utf-8")
     print(f"Wrote eval results: {out_path}")
+    print(f"Updated latest report: {latest_path}")
 
 
 if __name__ == "__main__":
