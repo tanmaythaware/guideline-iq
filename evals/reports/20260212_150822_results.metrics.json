@@ -1,0 +1,144 @@
+{
+  "meta": {
+    "dataset": "evals/datasets/golden.jsonl",
+    "api_base_url": "http://localhost:8000",
+    "timestamp": "20260212_150822",
+    "num_cases": 30
+  },
+  "summary": {
+    "total_cases": 30,
+    "ok_cases": 30,
+    "api_errors": 0,
+    "evaluated_cases": 30,
+    "decision_accuracy": 1.0,
+    "expected_refuse_cases": 12,
+    "refusal_precision": 1.0,
+    "refusal_reason_accuracy": 0.8333,
+    "empty_retrieval_rate": 0.2,
+    "answer_citation_compliance": 1.0,
+    "recall_at_k": 1.0,
+    "k": 5
+  },
+  "breakdowns": {
+    "reason_confusion": {
+      "low_retrieval_score_pre_generation": {
+        "llm_refusal": 2,
+        "low_retrieval_score_pre_generation": 4
+      },
+      "out_of_domain": {
+        "out_of_domain": 6
+      }
+    },
+    "actual_refusal_reason_counts": {
+      "llm_refusal": 2,
+      "low_retrieval_score_pre_generation": 4,
+      "out_of_domain": 6
+    },
+    "classifier_label_counts": {
+      "finance": 24,
+      "non_finance": 6
+    }
+  },
+  "samples": {
+    "api_errors": [],
+    "wrong_decisions": [],
+    "empty_retrieval": [
+      {
+        "id": "q25",
+        "query": "Write a 4-star review for a restaurant.",
+        "expected_decision": "refuse",
+        "expected_reason": "out_of_domain",
+        "gold_chunk_ids": [],
+        "status_code": 200,
+        "error": null,
+        "latency_ms": 652,
+        "actual_decision": "refuse",
+        "actual_reason": "out_of_domain",
+        "had_citations": false,
+        "classifier_label": "non_finance",
+        "classifier_confidence": 1.0,
+        "retrieved_ids": [],
+        "retrieved_scores": [],
+        "top_score": null,
+        "retrieval_duration_ms": 0.0
+      },
+      {
+        "id": "q26",
+        "query": "Explain Docker vs Kubernetes.",
+        "expected_decision": "refuse",
+        "expected_reason": "out_of_domain",
+        "gold_chunk_ids": [],
+        "status_code": 200,
+        "error": null,
+        "latency_ms": 783,
+        "actual_decision": "refuse",
+        "actual_reason": "out_of_domain",
+        "had_citations": false,
+        "classifier_label": "non_finance",
+        "classifier_confidence": 0.9,
+        "retrieved_ids": [],
+        "retrieved_scores": [],
+        "top_score": null,
+        "retrieval_duration_ms": 0.0
+      },
+      {
+        "id": "q27",
+        "query": "What is the best gym routine for beginners?",
+        "expected_decision": "refuse",
+        "expected_reason": "out_of_domain",
+        "gold_chunk_ids": [],
+        "status_code": 200,
+        "error": null,
+        "latency_ms": 619,
+        "actual_decision": "refuse",
+        "actual_reason": "out_of_domain",
+        "had_citations": false,
+        "classifier_label": "non_finance",
+        "classifier_confidence": 0.95,
+        "retrieved_ids": [],
+        "retrieved_scores": [],
+        "top_score": null,
+        "retrieval_duration_ms": 0.0
+      },
+      {
+        "id": "q28",
+        "query": "Translate this sentence into Hindi.",
+        "expected_decision": "refuse",
+        "expected_reason": "out_of_domain",
+        "gold_chunk_ids": [],
+        "status_code": 200,
+        "error": null,
+        "latency_ms": 667,
+        "actual_decision": "refuse",
+        "actual_reason": "out_of_domain",
+        "had_citations": false,
+        "classifier_label": "non_finance",
+        "classifier_confidence": 0.9,
+        "retrieved_ids": [],
+        "retrieved_scores": [],
+        "top_score": null,
+        "retrieval_duration_ms": 0.0
+      },
+      {
+        "id": "q29",
+        "query": "How do I build a React dropdown menu?",
+        "expected_decision": "refuse",
+        "expected_reason": "out_of_domain",
+        "gold_chunk_ids": [],
+        "status_code": 200,
+        "error": null,
+        "latency_ms": 693,
+        "actual_decision": "refuse",
+        "actual_reason": "out_of_domain",
+        "had_citations": false,
+        "classifier_label": "non_finance",
+        "classifier_confidence": 0.9,
+        "retrieved_ids": [],
+        "retrieved_scores": [],
+        "top_score": null,
+        "retrieval_duration_ms": 0.0
+      }
+    ],
+    "answer_missing_citations": []
+  }
+}

@@ -96,7 +96,7 @@ def embed_texts(texts: List[str]):
 
 
 def generate_answer(query: str, sources: list[dict]) -> str:
-    from .types import format_sources_for_prompt  # avoid circular import
+    from .types import format_sources_for_prompt 
 
     sources_text = format_sources_for_prompt(sources)
 
@@ -114,6 +114,48 @@ def generate_answer(query: str, sources: list[dict]) -> str:
 
     resp = with_retry(_call, "generate_answer")
     return resp.choices[0].message.content.strip()
+
+
+def normalize_classifier_label(raw_label: str | None) -> str:
+    if not raw_label:
+        return "unsure"
+
+    label = raw_label.strip().lower()
+
+    finance_terms = {
+        "finance",
+        "financial",
+        "financial regulation",
+        "financial regulations",
+        "financial promotions",
+        "promotion compliance",
+        "consumer duty",
+        "risk warnings",
+        "compliance",
+        "regulatory",
+    }
+
+    non_finance_terms = {
+        "non_finance",
+        "non-finance",
+        "general",
+        "other",
+        "out_of_domain",
+        "out-of-domain",
+    }
+
+    if label in finance_terms:
+        return "finance"
+    if label in non_finance_terms:
+        return "non_finance"
+
+    # soft matching for common model phrasing
+    if "financ" in label or "regulat" in label or "compliance" in label:
+        return "finance"
+    if "non" in label and "finance" in label:
+        return "non_finance"
+
+    return "unsure"
 
 
 def classify_query_domain(query: str) -> Dict:
@@ -134,7 +176,8 @@ def classify_query_domain(query: str) -> Dict:
         resp = with_retry(_call, "classify_query_domain")
         content = resp.choices[0].message.content.strip()
         parsed = json.loads(content)
-        label = parsed.get("label", "unsure")
+        # Normalize label to "finance", "non_finance", "unsure"
+        label = normalize_classifier_label(parsed.get("label", "unsure"))
         confidence = float(parsed.get("confidence", 0.0))
         return {"label": label, "confidence": confidence, "raw": content}
     except SafeFailureError:

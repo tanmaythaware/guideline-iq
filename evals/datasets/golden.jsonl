@@ -1,0 +1,30 @@
+{"id":"q01","query":"What kind of risk warnings should firms provide to retail consumers when offering cryptoasset services?","expected_decision":"answer","gold_chunk_ids":["fca_ps20_10_crypto_1","fca_ps20_10_crypto_2"],"tags":["crypto"]}
+{"id":"q02","query":"Why are clear and prominent risk warnings important for cryptoassets?","expected_decision":"answer","gold_chunk_ids":["fca_ps20_10_crypto_1","fca_ps20_10_crypto_2"],"tags":["crypto"]}
+{"id":"q03","query":"What should cryptoasset risk warnings help retail consumers understand?","expected_decision":"answer","gold_chunk_ids":["fca_ps20_10_crypto_2"],"tags":["crypto"]}
+{"id":"q04","query":"How should firms avoid misleading retail consumers when communicating about cryptoassets?","expected_decision":"answer","gold_chunk_ids":["fca_ps20_10_crypto_3"],"tags":["crypto"]}
+{"id":"q05","query":"Can crypto promotions focus only on benefits without mentioning risks?","expected_decision":"answer","gold_chunk_ids":["fca_ps20_10_crypto_3"],"tags":["crypto"]}
+{"id":"q06","query":"What are FCA expectations for balancing risks and benefits in cryptoasset communications?","expected_decision":"answer","gold_chunk_ids":["fca_ps20_10_crypto_3"],"tags":["crypto"]}
+{"id":"q07","query":"What is the FCA requirement for financial promotions?","expected_decision":"answer","gold_chunk_ids":["fca_fin_promos_1"],"tags":["promotions"]}
+{"id":"q08","query":"What does it mean for a financial promotion to be fair, clear and not misleading?","expected_decision":"answer","gold_chunk_ids":["fca_fin_promos_1"],"tags":["promotions"]}
+{"id":"q09","query":"How should risk disclosures be presented to the intended audience?","expected_decision":"answer","gold_chunk_ids":["fca_fin_promos_2"],"tags":["promotions"]}
+{"id":"q10","query":"Where should risk disclosures be placed so that consumers understand them?","expected_decision":"answer","gold_chunk_ids":["fca_fin_promos_2"],"tags":["promotions"]}
+{"id":"q11","query":"What practices should firms avoid when presenting important warnings?","expected_decision":"answer","gold_chunk_ids":["fca_fin_promos_3"],"tags":["promotions"]}
+{"id":"q12","query":"Why is disguising or obscuring warnings considered problematic in financial promotions?","expected_decision":"answer","gold_chunk_ids":["fca_fin_promos_3"],"tags":["promotions"]}
+{"id":"q13","query":"How should risk warnings be positioned to ensure consumers notice them?","expected_decision":"answer","gold_chunk_ids":["fca_risk_warnings_1"],"tags":["risk_warnings"]}
+{"id":"q14","query":"What makes a risk warning prominent according to FCA guidance?","expected_decision":"answer","gold_chunk_ids":["fca_risk_warnings_1"],"tags":["risk_warnings"]}
+{"id":"q15","query":"Why should risk warnings use plain language rather than complex wording?","expected_decision":"answer","gold_chunk_ids":["fca_risk_warnings_2"],"tags":["risk_warnings"]}
+{"id":"q16","query":"What does the Consumer Duty require firms to do for retail customers?","expected_decision":"answer","gold_chunk_ids":["fca_consumer_duty_1"],"tags":["consumer_duty"]}
+{"id":"q17","query":"How should firms ensure communications support customer understanding under the Consumer Duty?","expected_decision":"answer","gold_chunk_ids":["fca_consumer_duty_2"],"tags":["consumer_duty"]}
+{"id":"q18","query":"What role does identifying foreseeable harm play in delivering good customer outcomes?","expected_decision":"answer","gold_chunk_ids":["fca_consumer_duty_3"],"tags":["consumer_duty"]}
+{"id":"q19","query":"What is the exact wording required for cryptoasset risk warnings under FCA rules?","expected_decision":"refuse","expected_reason":"low_retrieval_score_pre_generation","tags":["crypto","in_domain_missing"]}
+{"id":"q20","query":"What are the FCA penalties for non-compliant crypto promotions?","expected_decision":"refuse","expected_reason":"low_retrieval_score_pre_generation","tags":["crypto","in_domain_missing"]}
+{"id":"q21","query":"What specific metrics should firms use to measure Consumer Duty outcomes?","expected_decision":"refuse","expected_reason":"low_retrieval_score_pre_generation","tags":["consumer_duty","in_domain_missing"]}
+{"id":"q22","query":"What is the FCA definition of a high-risk investment product?","expected_decision":"refuse","expected_reason":"low_retrieval_score_pre_generation","tags":["promotions","in_domain_missing"]}
+{"id":"q23","query":"What exact font size must risk warnings use in online promotions?","expected_decision":"refuse","expected_reason":"low_retrieval_score_pre_generation","tags":["risk_warnings","in_domain_missing"]}
+{"id":"q24","query":"What are the record-keeping requirements for approving financial promotions?","expected_decision":"refuse","expected_reason":"low_retrieval_score_pre_generation","tags":["promotions","in_domain_missing"]}
+{"id":"q25","query":"Write a 4-star review for a restaurant.","expected_decision":"refuse","expected_reason":"out_of_domain","tags":["ood"]}
+{"id":"q26","query":"Explain Docker vs Kubernetes.","expected_decision":"refuse","expected_reason":"out_of_domain","tags":["ood"]}
+{"id":"q27","query":"What is the best gym routine for beginners?","expected_decision":"refuse","expected_reason":"out_of_domain","tags":["ood"]}
+{"id":"q28","query":"Translate this sentence into Hindi.","expected_decision":"refuse","expected_reason":"out_of_domain","tags":["ood"]}
+{"id":"q29","query":"How do I build a React dropdown menu?","expected_decision":"refuse","expected_reason":"out_of_domain","tags":["ood"]}
+{"id":"q30","query":"Who won the football match yesterday?","expected_decision":"refuse","expected_reason":"out_of_domain","tags":["ood"]}
