@@ -17,18 +17,21 @@ import time
 import uuid
 from typing import Optional
 
-from fastapi import APIRouter, FastAPI, HTTPException, Query
+from fastapi import APIRouter, FastAPI, HTTPException, Header, Query
 
 from ingest.loader import load_docs
 from rag.core import InMemoryVectorStore
 from rag.llm import SafeFailureError, classify_query_domain, generate_answer
 from rag.prompts import REFUSAL_TEXT, SAFE_FAILURE_TEXT
 
+from .log_readers import tail_jsonl
 from .logging_utils import log_refusal, log_response
 from .schemas import AskResponse, TokenUsage, UsageInfo
 from .settings import (
+    ADMIN_TOKEN,
     DATA_PATH,
     DOMAIN_CONF_THRESHOLD,
+    LOG_DIR,
     RETRIEVAL_SCORE_THRESHOLD,
     TOP_K,
 )
@@ -167,6 +170,31 @@ def ready():
     if startup_error:
         return {"status": "error", "detail": startup_error}
     return {"status": "ok"}
+
+
+def _require_admin_token(x_admin_token: str | None) -> None:
+    if not ADMIN_TOKEN:
+        raise HTTPException(status_code=401, detail="ADMIN_TOKEN not set")
+    if not x_admin_token or x_admin_token != ADMIN_TOKEN:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+
+@router.get("/logs/refusals")
+def get_refusal_logs(
+    limit: int = Query(50),
+    x_admin_token: str | None = Header(default=None, alias="X-Admin-Token"),
+):
+    _require_admin_token(x_admin_token)
+    return tail_jsonl(str(LOG_DIR / "refusals.jsonl"), limit=limit)
+
+
+@router.get("/logs/responses")
+def get_response_logs(
+    limit: int = Query(50),
+    x_admin_token: str | None = Header(default=None, alias="X-Admin-Token"),
+):
+    _require_admin_token(x_admin_token)
+    return tail_jsonl(str(LOG_DIR / "responses.jsonl"), limit=limit)
 
 
 @router.get("/ask", response_model=AskResponse)

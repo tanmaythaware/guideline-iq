@@ -34,3 +34,7 @@ RETRIEVAL_SCORE_THRESHOLD: float = float(os.getenv("RETRIEVAL_SCORE_THRESHOLD", 
 # Retrieval configuration.
 TOP_K: int = int(os.getenv("TOP_K", "2"))
 
+
+# Admin configuration.
+ADMIN_TOKEN: str = os.getenv("ADMIN_TOKEN", "")
+

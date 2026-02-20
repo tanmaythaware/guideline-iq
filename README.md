@@ -14,7 +14,7 @@ GuidelineIQ is a Retrieval-Augmented Generation (RAG) system designed for regula
 - **LLM-Level Refusal**: Model explicitly refuses when sources are insufficient
 - **Safe Failure Handling**: Graceful degradation with timeout, retries, and explicit failure messages
 
-### **Production-Ready Observability**
+### **Production-Oriented Observability**
 - **Comprehensive Logging**: Every decision logged to JSONL with full context (classifier outputs, retrieval scores, refusal reasons)
 - **Token Usage Tracking**: Detailed token counts and cost estimates for all OpenAI API calls (classifier, embeddings, generation)
 - **Request Tracing**: Unique request IDs for end-to-end auditability
@@ -130,7 +130,11 @@ DOMAIN_CONF_THRESHOLD=0.6
 RETRIEVAL_SCORE_THRESHOLD=0.6
 TOP_K=2
 API_BASE_URL=http://localhost:8000
+ADMIN_TOKEN=some-secret-value
 ```
+
+Admin logs in the UI are accessible only when `ADMIN_TOKEN` is set and provided.
+The UI sends `X-Admin-Token` to protected `/logs/*` endpoints.
 
 ### **Thresholds Explained**
 
@@ -188,6 +192,24 @@ UI available at `http://localhost:8501`
 ---
 
 ## 📈 Observability & Logging
+
+---
+
+## 🖥️ UI Features
+
+The Streamlit interface includes two main tabs:
+
+### **Assistant**
+- Submit finance or compliance questions.
+- View grounded answers with citations.
+- See refusal decisions when queries are out-of-scope or evidence is weak.
+
+### **Audit**
+- View structured request logs for transparency and traceability.
+- Inspect classifier decisions, retrieval scores, refusal reasons, and token usage.
+- Filter and review recent requests for debugging and evaluation.
+
+> Note: The Audit tab is protected by an admin token in deployed environments.
 
 ### **Log Files**
 
