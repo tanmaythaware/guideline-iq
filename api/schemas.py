@@ -27,6 +27,20 @@ class RetrievalInfo(BaseModel):
     duration_ms: float
 
 
+class TokenUsage(BaseModel):
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
+    total_tokens: int = 0
+
+
+class UsageInfo(BaseModel):
+    classifier: TokenUsage
+    retrieval_embedding: TokenUsage
+    generation: Optional[TokenUsage] = None
+    total_tokens: int = 0
+    estimated_cost_usd: float = 0.0
+
+
 class AskRequest(BaseModel):
     q: str
 
@@ -42,6 +56,7 @@ class AskResponse(BaseModel):
     policy: Dict[str, Any]
     refusal_reason: Optional[str] = None
     retrieval: RetrievalInfo
+    usage: Optional[UsageInfo] = None
 
 
 __all__ = [

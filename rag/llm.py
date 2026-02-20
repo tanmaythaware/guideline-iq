@@ -92,10 +92,17 @@ def embed_texts(texts: List[str]):
     def _call():
         return client.embeddings.create(model=EMBEDDING_MODEL_NAME, input=texts)
 
-    return with_retry(_call, f"embed_texts({len(texts)} texts)")
+    resp = with_retry(_call, f"embed_texts({len(texts)} texts)")
+    # Embeddings API returns usage in response.usage
+    usage = getattr(resp, "usage", None)
+    if usage:
+        tokens = usage.total_tokens
+    else:
+        tokens = 0
+    return resp, tokens
 
 
-def generate_answer(query: str, sources: list[dict]) -> str:
+def generate_answer(query: str, sources: list[dict]) -> tuple[str, dict]:
     from .types import format_sources_for_prompt 
 
     sources_text = format_sources_for_prompt(sources)
@@ -113,7 +120,16 @@ def generate_answer(query: str, sources: list[dict]) -> str:
         )
 
     resp = with_retry(_call, "generate_answer")
-    return resp.choices[0].message.content.strip()
+    usage = getattr(resp, "usage", None)
+    if usage:
+        token_usage = {
+            "prompt_tokens": usage.prompt_tokens,
+            "completion_tokens": usage.completion_tokens,
+            "total_tokens": usage.total_tokens,
+        }
+    else:
+        token_usage = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
+    return resp.choices[0].message.content.strip(), token_usage
 
 
 def normalize_classifier_label(raw_label: str | None) -> str:
@@ -179,7 +195,16 @@ def classify_query_domain(query: str) -> Dict:
         # Normalize label to "finance", "non_finance", "unsure"
         label = normalize_classifier_label(parsed.get("label", "unsure"))
         confidence = float(parsed.get("confidence", 0.0))
-        return {"label": label, "confidence": confidence, "raw": content}
+        usage = getattr(resp, "usage", None)
+        if usage:
+            token_usage = {
+                "prompt_tokens": usage.prompt_tokens,
+                "completion_tokens": usage.completion_tokens,
+                "total_tokens": usage.total_tokens,
+            }
+        else:
+            token_usage = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
+        return {"label": label, "confidence": confidence, "raw": content, "token_usage": token_usage}
     except SafeFailureError:
         raise
     except Exception as exc:

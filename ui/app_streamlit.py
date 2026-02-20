@@ -110,6 +110,7 @@ if submitted and q.strip():
             classifier = data.get("classifier") or {}
             policy = data.get("policy") or {}
             retrieval = data.get("retrieval") or {}
+            usage = data.get("usage") or {}
 
             domain_thr = float(policy.get("domain_conf_threshold", 0.0))
             retrieval_thr = float(policy.get("retrieval_score_threshold", 0.0))
@@ -120,6 +121,13 @@ if submitted and q.strip():
             results = retrieval.get("results") or []
             top_score = float(results[0]["score"]) if results else 0.0
             retrieval_ms = float(retrieval.get("duration_ms", 0.0))
+
+            # Token usage
+            cls_usage = usage.get("classifier") or {}
+            retrieval_usage = usage.get("retrieval_embedding") or {}
+            gen_usage = usage.get("generation") or {}
+            total_tokens = usage.get("total_tokens", 0)
+            estimated_cost = usage.get("estimated_cost_usd", 0.0)
 
             # ---------- Result header ----------
             st.markdown("### Result")
@@ -174,18 +182,53 @@ if submitted and q.strip():
                     st.write(f"Confidence: `{cls_conf:.2f}` (threshold `{domain_thr:.2f}`)")
                     passed = (cls_label == "finance" and cls_conf >= domain_thr)
                     st.write(f"Pass: {'✅' if passed else '❌'}")
+                    cls_tokens = cls_usage.get("total_tokens", 0)
+                    if cls_tokens > 0:
+                        st.caption(f"Tokens: {cls_tokens}")
 
                 with d2:
                     st.markdown("**Retrieval**")
                     st.write(f"Top score: `{top_score:.3f}` (threshold `{retrieval_thr:.2f}`)")
                     st.write(f"Results returned: `{len(results)}`")
                     st.write(f"Duration: `{retrieval_ms:.1f} ms`")
+                    ret_tokens = retrieval_usage.get("total_tokens", 0)
+                    if ret_tokens > 0:
+                        st.caption(f"Embedding tokens: {ret_tokens}")
 
                 with d3:
                     st.markdown("**Policy**")
                     st.write(f"Domain confidence threshold = `{domain_thr}`")
                     st.write(f"Retrieval score threshold = `{retrieval_thr}`")
                     st.write(f"Number of chunks retrieved = `{retrieval.get('top_k', '—')}`")
+
+                # Token usage and cost summary
+                st.markdown("---")
+                st.markdown("#### Token Usage & Cost")
+                u1, u2, u3, u4 = st.columns(4)
+                
+                with u1:
+                    st.metric("Classifier", f"{cls_usage.get('total_tokens', 0)}")
+                    st.caption(f"Prompt: {cls_usage.get('prompt_tokens', 0)}")
+                
+                with u2:
+                    st.metric("Retrieval", f"{retrieval_usage.get('total_tokens', 0)}")
+                    st.caption("Embedding")
+                
+                with u3:
+                    gen_total = gen_usage.get("total_tokens", 0) if gen_usage else 0
+                    st.metric("Generation", f"{gen_total}")
+                    if gen_total > 0:
+                        st.caption(
+                            f"Prompt: {gen_usage.get('prompt_tokens', 0)}, "
+                            f"Completion: {gen_usage.get('completion_tokens', 0)}"
+                        )
+                    else:
+                        st.caption("Not executed")
+                
+                with u4:
+                    st.metric("**Total Tokens**", f"**{total_tokens}**")
+                    st.metric("**Estimated Cost**", f"**${estimated_cost:.6f}**")
+                    st.caption("USD")
 
                 if results:
                     with st.expander("Raw retrieval results", expanded=False):

@@ -1,189 +1,328 @@
-# Guideline IQ — Finance-first RAG Demo
+# GuidelineIQ 🤖
 
-Guideline IQ is an **interview-ready** Retrieval-Augmented Generation (RAG) system for finance and compliance. It answers only when (1) the question is in scope, (2) retrieval finds strong evidence, and (3) the model can ground an answer in that evidence. Otherwise it **refuses** with clear, auditable reasons—no citations on refusals.
+> **Production-ready RAG system with strict guardrails, comprehensive auditability, and cost tracking for finance and compliance use cases.**
 
----
-
-## What it does
-
-**End-to-end flow:** Query → **Domain classifier** → **Retrieve** → **Generate (grounded)** → Answer or refusal + sources
-
-- **Ingest**: Loads FCA-style guideline snippets from JSONL (`data/finance_guidelines.jsonl`).
-- **Embed**: OpenAI `text-embedding-3-small`; embeddings built once at startup.
-- **Retrieve**: Cosine similarity over in-memory vectors; returns top‑k chunks with scores.
-- **Generate**: GPT‑4o‑mini answers **only** from retrieved source text; prompts enforce grounding and refusal when sources are insufficient.
-- **Refuse**: Consistent refusal text when sources don’t support an answer: *"I don't know based on the provided sources yet."*
+GuidelineIQ is a Retrieval-Augmented Generation (RAG) system designed for regulated domains where **accuracy, auditability, and cost control** are critical. It implements a multi-layered guardrail system that ensures answers are only provided when (1) queries are in-scope, (2) retrieval finds strong evidence, and (3) the model can ground answers in that evidence. Otherwise, it **refuses gracefully** with clear, auditable reasons—never hallucinating or providing citations on refusals.
 
 ---
 
-## Guardrails (why it’s strict and auditable)
+## 🎯 Key Features
 
-### 1. Domain classification guardrail
+### **Multi-Layered Guardrails**
+- **Domain Classification**: Pre-flight check ensures queries are finance/compliance-related before any retrieval
+- **Retrieval Threshold**: Only generates answers when evidence strength exceeds configurable thresholds
+- **LLM-Level Refusal**: Model explicitly refuses when sources are insufficient
+- **Safe Failure Handling**: Graceful degradation with timeout, retries, and explicit failure messages
 
-Before any retrieval or generation, a small model call classifies the query as **finance** vs **non_finance** vs **unsure**, with a confidence score.
+### **Production-Ready Observability**
+- **Comprehensive Logging**: Every decision logged to JSONL with full context (classifier outputs, retrieval scores, refusal reasons)
+- **Token Usage Tracking**: Detailed token counts and cost estimates for all OpenAI API calls (classifier, embeddings, generation)
+- **Request Tracing**: Unique request IDs for end-to-end auditability
+- **Structured Refusal Reasons**: Clear categorization of why answers were refused
 
-- **Pass**: `label == "finance"` and `confidence >= DOMAIN_CONF_THRESHOLD` (default `0.6`).
-- **Fail**: Out-of-domain or low confidence → immediate refusal, no retrieval, no citations. Logged as `refusal_reason: "out_of_domain"`.
-
-This keeps the system from answering off-topic questions (e.g. “What is earth?”) and gives a clear, auditable signal in logs.
-
-### 2. Retrieval score threshold
-
-Even if the query is in scope, we only call the generator when retrieval is strong.
-
-- **Pass**: `top_score >= RETRIEVAL_SCORE_THRESHOLD` (default `0.6`).
-- **Fail**: Low similarity → refusal **before** generation (saves cost, avoids stretching weak sources). Logged as `refusal_reason: "low_retrieval_score_pre_generation"`.
-
-So we answer only when there is strong evidence in the guideline corpus.
-
-### 3. LLM-level refusal
-
-The generator is prompted to use **only** the provided source text. If it judges the sources insufficient, it responds with the exact refusal phrase above. We treat that as a refusal (`refusal_reason: "llm_refusal"`) and **do not** surface any citations.
-
-### 4. Safe failure (timeout + retries)
-
-All OpenAI calls (embeddings, classification, generation) are wrapped with:
-
-- **Timeout**: 30 seconds per request.
-- **Retries**: Up to 3 attempts with **exponential backoff** (1s, 2s, 4s) on transient errors (timeout, connection, rate limit).
-- **After exhaustion**: We do **not** crash or return partial data. We return a safe refusal: *"I can't answer safely right now."* with `refusal_reason` set to `classification_failure`, `retrieval_failure`, or `generation_failure`, and log it like any other refusal.
-
-So the system degrades gracefully under API issues and stays auditable.
+### **Cost Optimization**
+- **Early Exit**: Refusals happen before expensive generation calls when evidence is weak
+- **Token Tracking**: Real-time visibility into API costs per query
+- **Efficient Embeddings**: Single embedding call per query using `text-embedding-3-small`
 
 ---
 
-## Auditing and logs
+## 🏗️ Architecture
 
-- **Refusals**: Every refusal is appended to `logs/refusals.jsonl` with `event`, `request_id`, `query`, `retrieved` (ids + scores), `reason`, `classifier` (label + confidence), `top_score`, and `ts`.
-- **All responses**: Every `/ask` response is appended to `logs/responses.jsonl` with the full payload (answer, decision, confidence, citations, classifier, policy thresholds, refusal_reason, retrieval results, timestamp).
+![Architecture Diagram](docs/images/architecture.png)
 
-Refusal reasons you’ll see:
+### **System Flow**
 
-- `out_of_domain` — classifier didn’t pass.
-- `no_relevant_docs` — no chunks retrieved.
-- `low_retrieval_score_pre_generation` — retrieval score below threshold.
-- `llm_refusal` — model said sources are insufficient.
-- `classification_failure` / `retrieval_failure` / `generation_failure` — safe failure after retries.
+1. **Domain Classification** (`gpt-4o-mini`)
+   - Classifies query as `finance`, `non_finance`, or `unsure` with confidence score
+   - Threshold: `DOMAIN_CONF_THRESHOLD` (default: `0.6`)
+   - Failure → Immediate refusal, no retrieval, no citations
 
-This supports **auditability**, **strict refusals**, **low cost** (no generation on weak matches), and **knowledge expansion** (e.g. reviewing in-scope refusals to add or refine guidelines).
+2. **Retrieval** (`text-embedding-3-small` + cosine similarity)
+   - Embeds query and retrieves top-k chunks from in-memory vector store
+   - Threshold: `RETRIEVAL_SCORE_THRESHOLD` (default: `0.6`)
+   - Failure → Refusal before generation (saves cost)
+
+3. **Grounded Generation** (`gpt-4o-mini`)
+   - Generates answer strictly from retrieved sources
+   - Prompt enforces grounding and refusal when sources are insufficient
+   - Failure → Refusal with `llm_refusal` reason
+
+4. **Safe Failure Handling**
+   - All OpenAI calls wrapped with timeout (30s) and retries (3 attempts, exponential backoff)
+   - On exhaustion → Returns safe refusal: *"I can't answer safely right now."*
+   - Logged with failure reason (`classification_failure`, `retrieval_failure`, `generation_failure`)
 
 ---
 
-## Tech stack
+## 📊 Guardrails & Refusal Logic
 
-- **Python**, **FastAPI** (API), **Streamlit** (demo UI)
-- **OpenAI**: `text-embedding-3-small`, `gpt-4o-mini` (generation + domain classifier)
-- **In-memory vector store** (cosine similarity, no DB)
-- **JSONL** for knowledge base and logs
+### **Refusal Reasons**
+
+| Reason | Trigger | Cost Impact |
+|--------|---------|-------------|
+| `out_of_domain` | Classifier confidence < threshold or label ≠ "finance" | Minimal (only classifier tokens) |
+| `no_relevant_docs` | Retrieval returned empty results | Low (classifier + embedding tokens) |
+| `low_retrieval_score_pre_generation` | Top retrieval score < threshold | Low (no generation call) |
+| `llm_refusal` | Model judged sources insufficient | Full (all stages executed) |
+| `classification_failure` / `retrieval_failure` / `generation_failure` | API failures after retries | Variable (depends on failure point) |
+
+### **Key Design Decisions**
+
+- **No citations on refusals**: Ensures users never see misleading source references
+- **Early exit on weak evidence**: Saves generation costs when retrieval is weak
+- **Structured logging**: Every refusal includes classifier output, retrieval scores, and reason
+- **Token tracking**: Full visibility into API costs for cost optimization and budgeting
 
 ---
 
-## Project structure
+## 📁 Project Structure
 
 ```
-api/
-  app.py              # FastAPI app + startup wiring
-  routes.py           # /ask, /health, /ready
-  schemas.py          # Pydantic request/response models
-  settings.py         # env vars + thresholds
-  logging_utils.py    # log_response / log_refusal
-
-rag/
-  core.py             # retrieval (vector store, cosine similarity)
-  llm.py              # OpenAI: embeddings, generation, domain classifier, retry wrapper
-  prompts.py          # system prompts + refusal text
-  types.py            # helpers (e.g. format_sources_for_prompt)
-
-ingest/
-  loader.py           # load JSONL knowledge base from disk
-
-evals/
-  datasets/
-    golden.jsonl
-  run_eval.py
-  metrics.py
-
-ui/
-  app_streamlit.py    # Streamlit UI (calls API)
-
-data/
-  finance_guidelines.jsonl
-
-logs/
-  refusals.jsonl
-  responses.jsonl
-
-requirements.txt
-README.md
+guideline-iq/
+├── api/                    # FastAPI backend
+│   ├── app.py              # Application entry point + lifespan
+│   ├── routes.py           # /ask, /health, /ready endpoints
+│   ├── schemas.py          # Pydantic request/response models
+│   ├── settings.py         # Environment variables + thresholds
+│   └── logging_utils.py    # JSONL logging helpers
+│
+├── rag/                    # RAG core logic
+│   ├── core.py             # Vector store + cosine similarity
+│   ├── llm.py              # OpenAI API calls (embeddings, generation, classifier)
+│   ├── prompts.py          # System prompts + refusal text
+│   └── types.py            # Type helpers
+│
+├── ingest/                 # Data ingestion
+│   └── loader.py           # JSONL knowledge base loader
+│
+├── evals/                  # Evaluation framework
+│   ├── datasets/
+│   │   └── golden.jsonl    # Golden test cases
+│   ├── run_eval.py
+│   └── metrics.py
+│
+├── ui/                     # Streamlit frontend
+│   └── app_streamlit.py    # Interactive demo UI
+│
+├── data/                   # Knowledge base
+│   └── finance_guidelines.jsonl
+│
+└── logs/                   # Audit logs
+    ├── refusals.jsonl      # All refusals with full context
+    └── responses.jsonl     # All responses with usage data
 ```
 
 ---
 
-## Configuration (env)
+## 🔧 Configuration
 
-Create a `.env` in the repo root. All except `OPENAI_API_KEY` have defaults.
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `OPENAI_API_KEY` | — | **Required.** OpenAI API key. |
-| `DATA_PATH` | `data/finance_guidelines.jsonl` | Path to JSONL knowledge base. |
-| `LOG_DIR` | `logs` | Directory for refusals and responses JSONL. |
-| `DOMAIN_CONF_THRESHOLD` | `0.6` | Min classifier confidence to treat query as in-scope. |
-| `RETRIEVAL_SCORE_THRESHOLD` | `0.6` | Min top retrieval score to call the generator. |
-| `TOP_K` | `2` | Number of chunks retrieved per query. |
-| `API_BASE_URL` | `http://localhost:8000` | Used by Streamlit to call the API. |
-
----
-
-## Setup
+Create a `.env` file in the repository root:
 
 ```bash
-python -m venv venv
-source venv/bin/activate   # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-```
-
-Add `.env` with at least:
-
-```bash
+# Required
 OPENAI_API_KEY=your_key_here
+
+# Optional (defaults shown)
+DATA_PATH=data/finance_guidelines.jsonl
+LOG_DIR=logs
+DOMAIN_CONF_THRESHOLD=0.6
+RETRIEVAL_SCORE_THRESHOLD=0.6
+TOP_K=2
+API_BASE_URL=http://localhost:8000
 ```
+
+### **Thresholds Explained**
+
+- **`DOMAIN_CONF_THRESHOLD`**: Minimum classifier confidence to treat query as in-scope. Higher = stricter domain filtering.
+- **`RETRIEVAL_SCORE_THRESHOLD`**: Minimum cosine similarity score to proceed to generation. Higher = stricter evidence requirements.
+- **`TOP_K`**: Number of chunks retrieved per query. Higher = more context but higher embedding costs.
 
 ---
 
-## Run locally
+## 🚀 Quick Start
 
-**Terminal A — API**
+### **Prerequisites**
 
+- Python 3.9+
+- OpenAI API key
+
+### **Installation**
+
+```bash
+# Clone repository
+git clone <repository-url>
+cd guideline-iq
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Configure environment
+cp .env.example .env  # Edit with your OPENAI_API_KEY
+```
+
+### **Run Locally**
+
+**Terminal 1 — API Server**
 ```bash
 uvicorn api.app:app --reload
 ```
+API available at `http://localhost:8000`
 
-**Terminal B — UI**
-
+**Terminal 2 — UI**
 ```bash
 streamlit run ui/app_streamlit.py
 ```
+UI available at `http://localhost:8501`
 
-- **API**: `http://localhost:8000`  
-  - `GET /ask?q=...` — main Q&A endpoint  
-  - `GET /health` — liveness  
-  - `GET /ready` — readiness (checks embeddings loaded at startup)
-- **UI**: Uses `API_BASE_URL` (default above) to call `/ask`.
+### **API Endpoints**
 
----
-
-## Sample queries
-
-- **In-scope (answer with citations):** “What should a crypto risk warning include for retail customers?”
-- **Out-of-scope (refusal, no citations):** “What is earth?” or “What is the capital of France?”
-- **In-scope but weak match (refusal before generation):** A finance question phrased so that no guideline chunk scores above the threshold.
+- `GET /ask?q=<query>` — Main Q&A endpoint
+- `GET /health` — Liveness check
+- `GET /ready` — Readiness check (verifies embeddings loaded)
 
 ---
 
-## Why this project (portfolio / interview)
+## 📈 Observability & Logging
 
-- **Layered guardrails**: Domain classifier → retrieval threshold → LLM refusal. Clear separation of “in scope?” vs “enough evidence?” vs “can answer from sources?”
-- **Safe failure**: Timeout + retries + explicit “I can’t answer safely right now.” so the system never pretends to answer when the API is failing.
-- **Auditability**: Every decision path is logged with refusal reason, classifier output, and retrieval scores—suitable for compliance and improving the knowledge base.
-- **Production-style layout**: Settings, routes, schemas, logging, and RAG logic split into focused modules without changing behaviour.
+### **Log Files**
+
+**`logs/refusals.jsonl`** — All refusals with full context:
+```json
+{
+  "event": "refusal",
+  "request_id": "uuid",
+  "query": "...",
+  "reason": "out_of_domain",
+  "classifier": {"label": "non_finance", "confidence": 0.3},
+  "top_score": null,
+  "usage": {
+    "classifier": {"total_tokens": 45},
+    "retrieval_embedding": {"total_tokens": 0},
+    "generation": null,
+    "total_tokens": 45,
+    "estimated_cost_usd": 0.00000675
+  },
+  "ts": 1234567890.123
+}
+```
+
+**`logs/responses.jsonl`** — All responses (answers + refusals):
+```json
+{
+  "request_id": "uuid",
+  "query": "...",
+  "answer": "...",
+  "decision": "answer",
+  "confidence": "high",
+  "citations": [...],
+  "usage": {
+    "classifier": {"prompt_tokens": 120, "completion_tokens": 15, "total_tokens": 135},
+    "retrieval_embedding": {"total_tokens": 25},
+    "generation": {"prompt_tokens": 450, "completion_tokens": 180, "total_tokens": 630},
+    "total_tokens": 790,
+    "estimated_cost_usd": 0.0001185
+  },
+  "ts": 1234567890.123
+}
+```
+
+### **Token Usage & Cost Tracking**
+
+Every response includes detailed token usage:
+- **Classifier tokens**: Input + output tokens for domain classification
+- **Retrieval embedding tokens**: Tokens used for query embedding
+- **Generation tokens**: Input (prompt) + output (completion) tokens
+- **Total tokens**: Sum across all stages
+- **Estimated cost**: Calculated using OpenAI pricing (as of 2024):
+  - Embeddings: $0.02 per 1M tokens
+  - GPT-4o-mini input: $0.15 per 1M tokens
+  - GPT-4o-mini output: $0.60 per 1M tokens
+
+---
+
+## 🧪 Example Queries
+
+### **In-Scope (Answer with Citations)**
+```
+"What should a crypto risk warning include for retail customers?"
+```
+→ Returns answer with citations from FCA guidelines
+
+### **Out-of-Scope (Refusal)**
+```
+"What is the capital of France?"
+```
+→ Refusal: `out_of_domain` (no citations)
+
+### **Weak Evidence (Refusal Before Generation)**
+```
+Finance question phrased so retrieval score < threshold
+```
+→ Refusal: `low_retrieval_score_pre_generation` (saves generation cost)
+
+---
+
+## 🎓 Why This Project (Portfolio / Interview)
+
+### **Production-Ready Engineering**
+
+- **Modular Architecture**: Clean separation of concerns (API, RAG logic, ingestion, UI)
+- **Type Safety**: Pydantic models for request/response validation
+- **Error Handling**: Comprehensive retry logic with exponential backoff
+- **Observability**: Structured logging with request tracing and token tracking
+- **Cost Awareness**: Early exit strategies and detailed cost tracking
+
+### **Domain Expertise**
+
+- **Guardrail Design**: Multi-layered approach (classifier → retrieval → generation)
+- **Refusal Logic**: Clear, auditable refusal reasons suitable for compliance
+- **Cost Optimization**: Strategic use of early exits to minimize API costs
+- **Knowledge Base Management**: JSONL-based approach for easy expansion
+
+### **Technical Highlights**
+
+- **Vector Search**: In-memory cosine similarity (production would use Pinecone/Weaviate)
+- **Embedding Strategy**: Single embedding call per query with efficient model
+- **Prompt Engineering**: System prompts enforce grounding and refusal behavior
+- **Safe Failure**: Graceful degradation under API failures
+
+---
+
+## 📚 Tech Stack
+
+- **Backend**: Python 3.9+, FastAPI
+- **Frontend**: Streamlit
+- **LLM**: OpenAI (`gpt-4o-mini` for generation/classification, `text-embedding-3-small` for embeddings)
+- **Vector Store**: In-memory cosine similarity (no external DB)
+- **Logging**: JSONL files for auditability
+- **Validation**: Pydantic for request/response schemas
+
+---
+
+## 🔒 Security & Compliance
+
+- **API Keys**: Stored in `.env` (never committed)
+- **Audit Trail**: All decisions logged with full context
+- **Refusal Transparency**: Clear reasons for every refusal
+- **No Hallucination**: Citations only appear when answers are grounded
+
+---
+
+## 📝 License
+
+[Add your license here]
+
+---
+
+## 🤝 Contributing
+
+[Add contribution guidelines if applicable]
+
+---
+
+**Built with attention to production concerns: reliability, observability, cost control, and auditability.**

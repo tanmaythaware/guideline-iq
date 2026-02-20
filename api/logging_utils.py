@@ -28,6 +28,7 @@ def log_refusal(
     *,
     classifier: dict | None = None,
     top_score: float | None = None,
+    usage: dict | None = None,
 ) -> None:
     try:
         LOG_DIR.mkdir(exist_ok=True)
@@ -44,6 +45,8 @@ def log_refusal(
             "top_score": float(top_score) if top_score is not None else None,
             "ts": time.time(),
         }
+        if usage:
+            entry["usage"] = usage
         with REFUSAL_LOG.open("a") as f:
             f.write(json.dumps(entry) + "\n")
     except Exception as exc:  # don't fail requests if logging fails

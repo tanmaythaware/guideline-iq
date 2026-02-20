@@ -31,16 +31,16 @@ class InMemoryVectorStore:
         if not docs:
             return
         texts = [d["text"] for d in docs]
-        resp = embed_texts(texts)
+        resp, _ = embed_texts(texts)
         vectors = [item.embedding for item in resp.data]
         for doc, vec in zip(docs, vectors):
             self._docs.append({"id": doc["id"], "text": doc["text"]})
             self._embeddings.append(np.array(vec, dtype=np.float32))
 
-    def query(self, q: str, top_k: int = 1) -> List[Dict[str, str]]:
+    def query(self, q: str, top_k: int = 1) -> tuple[List[Dict[str, str]], int]:
         if not self._docs:
-            return []
-        resp = embed_texts([q])
+            return [], 0
+        resp, tokens = embed_texts([q])
         q_vec = np.array(resp.data[0].embedding, dtype=np.float32)
         scored: list[Dict[str, str]] = []
         for doc, vec in zip(self._docs, self._embeddings):
@@ -48,7 +48,7 @@ class InMemoryVectorStore:
             scored.append({"id": doc["id"], "text": doc["text"], "score": score})
         logger.info("Scored %d docs for query.", len(scored))
         scored.sort(key=lambda x: x["score"], reverse=True)
-        return scored[:top_k]
+        return scored[:top_k], tokens
 
 
 __all__ = ["InMemoryVectorStore"]
