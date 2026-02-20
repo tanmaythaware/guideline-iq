@@ -38,3 +38,8 @@ TOP_K: int = int(os.getenv("TOP_K", "2"))
 # Admin configuration.
 ADMIN_TOKEN: str = os.getenv("ADMIN_TOKEN", "")
 
+
+# Abuse protection configuration.
+API_ACCESS_KEY: str = os.getenv("API_ACCESS_KEY", "")
+ASK_RATE_LIMIT: str = os.getenv("ASK_RATE_LIMIT", "10/minute")
+

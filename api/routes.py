@@ -17,18 +17,21 @@ import time
 import uuid
 from typing import Optional
 
-from fastapi import APIRouter, FastAPI, HTTPException, Header, Query
+from fastapi import APIRouter, FastAPI, HTTPException, Header, Query, Request
 
 from ingest.loader import load_docs
 from rag.core import InMemoryVectorStore
 from rag.llm import SafeFailureError, classify_query_domain, generate_answer
 from rag.prompts import REFUSAL_TEXT, SAFE_FAILURE_TEXT
 
+from .app import limiter
 from .log_readers import tail_jsonl
 from .logging_utils import log_refusal, log_response
 from .schemas import AskResponse, TokenUsage, UsageInfo
 from .settings import (
     ADMIN_TOKEN,
+    API_ACCESS_KEY,
+    ASK_RATE_LIMIT,
     DATA_PATH,
     DOMAIN_CONF_THRESHOLD,
     LOG_DIR,
@@ -198,9 +201,17 @@ def get_response_logs(
 
 
 @router.get("/ask", response_model=AskResponse)
-def ask(q: str = Query(..., description="User question")):
+@limiter.limit(ASK_RATE_LIMIT)
+def ask(
+    request: Request,
+    q: str = Query(..., description="User question"),
+    x_api_key: str | None = Header(default=None, alias="X-API-Key"),
+):
     request_id = str(uuid.uuid4())
     logger.info("request_id=%s event=request_start q=%s", request_id, q)
+
+    if API_ACCESS_KEY and x_api_key != API_ACCESS_KEY:
+        raise HTTPException(status_code=401, detail="Unauthorized")
 
     if startup_error:
         logger.error(

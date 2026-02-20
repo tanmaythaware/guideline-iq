@@ -29,6 +29,7 @@ def resolve_api_base_url() -> str:
 
 API_BASE_URL = resolve_api_base_url()
 ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "")
+API_ACCESS_KEY = os.getenv("API_ACCESS_KEY", "")
 
 st.set_page_config(page_title="GuidelineIQ", page_icon="🤖", layout="centered")
 
@@ -121,10 +122,12 @@ with assistant_tab:
             st.error("API looks offline. Check API_BASE_URL and that FastAPI is running.")
         else:
             try:
+                ask_headers = {"X-API-Key": API_ACCESS_KEY} if API_ACCESS_KEY else {}
                 with st.spinner("Running guardrails → retrieval → grounded generation…"):
                     data = get_json(
                         f"{API_BASE_URL}/ask",
                         params={"q": q},
+                        headers=ask_headers,
                         timeout=30,
                     )
 

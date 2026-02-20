@@ -131,10 +131,18 @@ RETRIEVAL_SCORE_THRESHOLD=0.6
 TOP_K=2
 API_BASE_URL=http://localhost:8000
 ADMIN_TOKEN=some-secret-value
+API_ACCESS_KEY=
+ASK_RATE_LIMIT=10/minute
 ```
 
 Admin logs in the UI are accessible only when `ADMIN_TOKEN` is set and provided.
 The UI sends `X-Admin-Token` to protected `/logs/*` endpoints.
+
+### Abuse protection
+
+- `/ask` is rate-limited per IP (default `10/minute`, configurable via `ASK_RATE_LIMIT`).
+- Optional API key protection is available via `API_ACCESS_KEY` and `X-API-Key`.
+- The Streamlit UI automatically sends `X-API-Key` when `API_ACCESS_KEY` is set.
 
 ### **Thresholds Explained**
 
