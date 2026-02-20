@@ -1,6 +1,6 @@
 # GuidelineIQ 🤖
 
-> **Production-ready RAG system with strict guardrails, comprehensive auditability, and cost tracking for finance and compliance use cases.**
+> **Production-style RAG system with strict guardrails, auditability, and cost tracking for regulated finance use cases**
 
 GuidelineIQ is a Retrieval-Augmented Generation (RAG) system designed for regulated domains where **accuracy, auditability, and cost control** are critical. It implements a multi-layered guardrail system that ensures answers are only provided when (1) queries are in-scope, (2) retrieval finds strong evidence, and (3) the model can ground answers in that evidence. Otherwise, it **refuses gracefully** with clear, auditable reasons—never hallucinating or providing citations on refusals.
 
@@ -269,13 +269,19 @@ Finance question phrased so retrieval score < threshold
 
 ## 🎓 Why This Project (Portfolio / Interview)
 
-### **Production-Ready Engineering**
+GuidelineIQ explores a core challenge in applied AI:
 
-- **Modular Architecture**: Clean separation of concerns (API, RAG logic, ingestion, UI)
-- **Type Safety**: Pydantic models for request/response validation
-- **Error Handling**: Comprehensive retry logic with exponential backoff
-- **Observability**: Structured logging with request tracing and token tracking
-- **Cost Awareness**: Early exit strategies and detailed cost tracking
+> How do you design LLM systems that are safe, auditable, and cost-aware in regulated environments?
+
+Rather than maximizing answer rate, this system prioritizes safe refusal when evidence is weak — a critical property for finance and compliance use cases.
+
+### **Production-Oriented Engineering**
+
+- **Modular Architecture**: Clear separation of API layer, RAG core, ingestion, evaluation, and UI.
+- **Type Safety**: Pydantic models enforce strict request/response contracts.
+- **Resilience**: Timeout + retry logic with exponential backoff for all external API calls.
+- **Observability**: Structured JSON logging with request IDs, refusal reasons, and token usage.
+- **Cost Awareness**: Early-exit guardrails prevent unnecessary generation calls.
 
 ### **Domain Expertise**
 
@@ -293,6 +299,20 @@ Finance question phrased so retrieval score < threshold
 
 ---
 
+## ⚖️ Tradeoffs & Limitations
+
+This project is intentionally designed to demonstrate guardrail logic, auditability, and cost-awareness rather than full-scale infrastructure.
+
+- **In-memory vector store**: Chosen for simplicity and clarity. A production deployment would use a persistent vector database (e.g., Pinecone, Weaviate, pgvector).
+- **Small evaluation dataset (30 cases)**: Designed to validate guardrail and refusal behavior, not to benchmark large-scale model performance.
+- **Single-node architecture**: Focused on correctness and observability. Production systems would include horizontal scaling and async workers.
+- **Static knowledge base**: Guidelines are loaded at startup. A production version would support incremental updates, versioning, and monitoring for drift.
+- **No authentication layer**: Security concerns such as RBAC, encryption-at-rest, and API rate limiting would be added in a real deployment.
+
+The goal is to clearly demonstrate architectural decisions, safety boundaries, and observability patterns for regulated AI systems.
+
+---
+
 ## 📚 Tech Stack
 
 - **Backend**: Python 3.9+, FastAPI
@@ -304,7 +324,7 @@ Finance question phrased so retrieval score < threshold
 
 ---
 
-## 🔒 Security & Compliance
+## 🔒 Compliance-Oriented Design
 
 - **API Keys**: Stored in `.env` (never committed)
 - **Audit Trail**: All decisions logged with full context
@@ -313,16 +333,26 @@ Finance question phrased so retrieval score < threshold
 
 ---
 
+## 🚀 Scaling Considerations (Production Deployment)
+
+If deployed in a real-world environment, the following improvements would be implemented:
+
+- Replace in-memory vector store with a persistent vector database (e.g., Pinecone, Weaviate, pgvector).
+- Add caching layer for repeated queries to reduce embedding and generation costs.
+- Move embedding and generation calls to asynchronous workers (Celery / background tasks).
+- Containerize services with Docker and deploy behind a load balancer.
+- Add structured metrics export (Prometheus / OpenTelemetry).
+- Implement authentication, RBAC, and API rate limiting.
+- Introduce automated evaluation pipelines integrated into CI/CD.
+
+The current implementation focuses on correctness, safety, and architectural clarity.
+
 ## 📝 License
 
-[Add your license here]
+This project is licensed under the Apache License 2.0.
 
----
+You are free to use, modify, and distribute this software under the terms of the license.
 
-## 🤝 Contributing
+See the [LICENSE](LICENSE) file for details.
 
-[Add contribution guidelines if applicable]
-
----
-
-**Built with attention to production concerns: reliability, observability, cost control, and auditability.**
+**Built using production-oriented engineering principles: reliability, observability, cost control, and explicit safety boundaries.**
