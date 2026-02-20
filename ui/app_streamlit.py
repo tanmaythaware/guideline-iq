@@ -4,7 +4,30 @@ import streamlit as st
 from dotenv import load_dotenv
 
 load_dotenv()
-API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000")
+
+
+def resolve_api_base_url() -> str:
+    # 1) Explicit override for local/dev/prod
+    explicit = os.getenv("API_BASE_URL")
+    if explicit:
+        explicit = explicit.rstrip("/")
+        # requests needs an absolute URL; convert relative /api in container env.
+        if explicit.startswith("/"):
+            port = os.getenv("PORT")
+            if port:
+                return f"http://127.0.0.1:{port}{explicit}"
+        if not explicit.startswith("http://") and not explicit.startswith("https://"):
+            return f"http://{explicit}"
+        return explicit
+    # 2) Render single-service container: call nginx on same host/port
+    port = os.getenv("PORT")
+    if port:
+        return f"http://127.0.0.1:{port}/api"
+    # 3) Local default
+    return "http://localhost:8000"
+
+
+API_BASE_URL = resolve_api_base_url()
 ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "")
 
 st.set_page_config(page_title="GuidelineIQ", page_icon="🤖", layout="centered")
