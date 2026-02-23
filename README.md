@@ -2,6 +2,12 @@
 
 > **Production-style RAG system with strict guardrails, auditability, and cost tracking for regulated finance use cases**
 
+🔗 **Live Demo:** https://guideline-iq.onrender.com/
+
+📂 **Source Code:** https://github.com/tanmaythaware/guideline-iq
+
+---
+
 GuidelineIQ is a Retrieval-Augmented Generation (RAG) system designed for regulated domains where **accuracy, auditability, and cost control** are critical. It implements a multi-layered guardrail system that ensures answers are only provided when (1) queries are in-scope, (2) retrieval finds strong evidence, and (3) the model can ground answers in that evidence. Otherwise, it **refuses gracefully** with clear, auditable reasons—never hallucinating or providing citations on refusals.
 
 ---
